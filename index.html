@@ -12,39 +12,39 @@
 </head>
 <body class="bg-gray-100 font-sans min-h-screen">
 
-    <!-- Notification Sound (Short Notification Tone) -->
+    <!-- Notification Sound (Clear Multi-tone Bell/Chime) -->
     <audio id="notifSound" preload="auto">
-        <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+        <source src="https://assets.mixkit.co/active_storage/sfx/1516/1516-preview.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- Top Navigation Bar -->
-    <nav class="bg-indigo-700 text-white p-4 shadow-lg flex justify-between items-center">
-        <h1 class="text-xl font-bold">School Reporting Portal</h1>
-        <div class="space-x-2">
-            <button onclick="switchTab('coordinator')" class="bg-indigo-800 hover:bg-indigo-900 px-4 py-2 rounded-lg text-sm font-semibold transition">Coordinator View</button>
-            <button onclick="switchTab('madam')" class="bg-indigo-800 hover:bg-indigo-900 px-4 py-2 rounded-lg text-sm font-semibold transition relative">
+    <!-- Top Navigation Bar (Mobile Responsive) -->
+    <nav class="bg-indigo-700 text-white p-3 sm:p-4 shadow-lg flex flex-col sm:flex-row justify-between items-center gap-3">
+        <h1 class="text-lg sm:text-xl font-bold text-center sm:text-left">School Reporting Portal</h1>
+        <div class="flex space-x-2 w-full sm:w-auto justify-center">
+            <button onclick="switchTab('coordinator')" class="flex-1 sm:flex-none bg-indigo-800 hover:bg-indigo-900 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition text-center">Coordinator View</button>
+            <button onclick="switchTab('madam')" class="flex-1 sm:flex-none bg-indigo-800 hover:bg-indigo-900 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition relative text-center">
                 Madam View
-                <span id="notifBadge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full animate-pulse">New</span>
+                <span id="notifBadge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full animate-pulse">New</span>
             </button>
         </div>
     </nav>
 
-    <div class="max-w-4xl mx-auto p-6">
+    <div class="max-w-4xl mx-auto p-3 sm:p-6">
 
         <!-- ================= COORDINATOR SECTION ================= -->
-        <section id="coordinatorTab" class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4 pb-2 border-b">Coordinator Daily Report Form</h2>
+        <section id="coordinatorTab" class="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-200">
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 pb-2 border-b">Coordinator Daily Report Form</h2>
             
             <form id="reportForm" onsubmit="submitReport(event)" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Teacher Name</label>
-                    <input type="text" id="teacherName" required placeholder="Enter Teacher Name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Teacher Name</label>
+                    <input type="text" id="teacherName" required placeholder="Enter Teacher Name" class="w-full p-2.5 sm:p-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Class & Section</label>
-                        <select id="className" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Class & Section</label>
+                        <select id="className" required class="w-full p-2.5 sm:p-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                             <option value="">Select Class</option>
                             <option value="Nursery">Nursery</option>
                             <option value="Prep">Prep</option>
@@ -57,42 +57,42 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Subject / Period</label>
-                        <input type="text" id="subjectName" required placeholder="e.g. Mathematics - 2nd Period" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Subject / Period</label>
+                        <input type="text" id="subjectName" required placeholder="e.g. Mathematics - 2nd Period" class="w-full p-2.5 sm:p-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Lesson / Work Done in Class</label>
-                    <textarea id="workDone" rows="4" required placeholder="Details of what was taught today..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Lesson / Work Done in Class</label>
+                    <textarea id="workDone" rows="4" required placeholder="Details of what was taught today..." class="w-full p-2.5 sm:p-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
                 </div>
 
-                <button type="submit" id="submitBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg shadow transition">
+                <button type="submit" id="submitBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 text-sm sm:text-base rounded-lg shadow transition">
                     Submit Report to Madam
                 </button>
             </form>
         </section>
 
         <!-- ================= MADAM / PRINCIPAL SECTION ================= -->
-        <section id="madamTab" class="hidden bg-white rounded-xl shadow-md p-6 border border-gray-200">
-            <div class="flex justify-between items-center mb-4 pb-2 border-b">
-                <h2 class="text-2xl font-bold text-gray-800">Madam Dashboard (Live Reports)</h2>
-                <div class="flex items-center gap-2">
-                    <button onclick="enableSoundAndPermission()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-xs px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1 shadow-sm">
+        <section id="madamTab" class="hidden bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-200">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4 pb-2 border-b">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Madam Dashboard</h2>
+                <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                    <button onclick="enableSoundAndPermission()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-xs px-2.5 py-1.5 rounded-lg font-semibold transition flex items-center gap-1 shadow-sm">
                         🔔 Enable Sound & Alerts
                     </button>
-                    <span id="reportCount" class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-3 py-1 rounded-full">0 Reports Today</span>
+                    <span id="reportCount" class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap">0 Reports</span>
                 </div>
             </div>
 
             <!-- Toast Notification Banner -->
-            <div id="toastNotif" class="hidden mb-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-sm" role="alert">
+            <div id="toastNotif" class="hidden mb-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-3 sm:p-4 rounded shadow-sm text-sm" role="alert">
                 <p class="font-bold">Naya Notification!</p>
                 <p id="toastMsg">Aik naye period ki report submit hui hai.</p>
             </div>
 
-            <div id="reportsList" class="space-y-4">
-                <p class="text-gray-500 text-center py-6">Loading reports...</p>
+            <div id="reportsList" class="space-y-3 sm:space-y-4">
+                <p class="text-gray-500 text-center py-6 text-sm">Loading reports...</p>
             </div>
         </section>
 
@@ -115,9 +115,7 @@
 
         let initialLoadDone = false;
 
-        // Manual Sound & Notification Enable (Sirf Button Click par chalaega)
         function enableSoundAndPermission() {
-            // Unlocks browser audio policy
             const audio = document.getElementById('notifSound');
             audio.play().then(() => {
                 audio.pause();
@@ -137,7 +135,6 @@
             }
         }
 
-        // Switch View (Tab badalne par auto-popup bilkul nahi aayega)
         function switchTab(tab) {
             if (tab === 'coordinator') {
                 document.getElementById('coordinatorTab').classList.remove('hidden');
@@ -149,7 +146,6 @@
             }
         }
 
-        // Submit Form
         function submitReport(e) {
             e.preventDefault();
             const submitBtn = document.getElementById('submitBtn');
@@ -177,14 +173,13 @@
             });
         }
 
-        // Realtime Listener for Madam View
         db.collection('reports').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
             const reportsList = document.getElementById('reportsList');
             reportsList.innerHTML = '';
 
             if (snapshot.empty) {
-                reportsList.innerHTML = '<p class="text-gray-500 text-center py-6">Abhi tak koi report submit nahi hui.</p>';
-                document.getElementById('reportCount').innerText = '0 Reports Today';
+                reportsList.innerHTML = '<p class="text-gray-500 text-center py-6 text-sm">Abhi tak koi report submit nahi hui.</p>';
+                document.getElementById('reportCount').innerText = '0 Reports';
                 return;
             }
 
@@ -197,15 +192,15 @@
                 if (index === 0) latestDoc = report;
 
                 const card = `
-                    <div class="bg-gray-50 border-l-4 border-indigo-600 p-4 rounded-r-lg shadow-sm">
-                        <div class="flex justify-between items-start mb-2">
+                    <div class="bg-gray-50 border-l-4 border-indigo-600 p-3 sm:p-4 rounded-r-lg shadow-sm">
+                        <div class="flex justify-between items-start mb-1 sm:mb-2 gap-2">
                             <div>
-                                <h3 class="font-bold text-gray-800 text-lg">${report.teacher}</h3>
-                                <p class="text-sm font-semibold text-indigo-600">${report.class} - ${report.subject}</p>
+                                <h3 class="font-bold text-gray-800 text-base sm:text-lg">${report.teacher}</h3>
+                                <p class="text-xs sm:text-sm font-semibold text-indigo-600">${report.class} - ${report.subject}</p>
                             </div>
-                            <span class="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded">${report.timestamp || ''}</span>
+                            <span class="text-[10px] sm:text-xs bg-gray-200 text-gray-600 px-2 py-0.5 sm:py-1 rounded whitespace-nowrap">${report.timestamp || ''}</span>
                         </div>
-                        <p class="text-gray-700 text-sm mt-2 bg-white p-3 rounded border border-gray-200">${report.work}</p>
+                        <p class="text-gray-700 text-xs sm:text-sm mt-2 bg-white p-2.5 sm:p-3 rounded border border-gray-200 whitespace-pre-line">${report.work}</p>
                     </div>
                 `;
                 reportsList.innerHTML += card;
@@ -214,10 +209,8 @@
             if (initialLoadDone && snapshot.docChanges().some(change => change.type === "added")) {
                 document.getElementById('notifBadge').classList.remove('hidden');
                 
-                // 1. Play Sound
                 playNotificationSound();
 
-                // 2. Desktop Notification & Toast Banner
                 const msg = `${latestDoc ? latestDoc.teacher : 'Teacher'} ne ${latestDoc ? latestDoc.class : 'class'} ki report submit ki hai.`;
                 showToast(msg);
                 showDesktopNotification("Nayi Class Report!", msg);
