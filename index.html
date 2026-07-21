@@ -26,7 +26,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans min-h-screen text-gray-800">
+<body class="bg-gray-100 font-sans min-h-screen text-gray-800" onclick="unlockAudioOnInteraction()">
 
     <!-- Backup Audio Tag -->
     <audio id="notifSound" preload="auto">
@@ -185,13 +185,40 @@
         const db = firebase.firestore();
 
         let initialLoadDone = false;
-        let isMadamLoggedIn = false; // Madam Login State Flag
+        let isMadamLoggedIn = false;
+        let audioCtx = null;
+
+        // Register Service Worker for Background Alerts
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:text/javascript;charset=utf-8,' + encodeURIComponent(`
+                self.addEventListener('push', function(event) {
+                    const data = event.data ? event.data.json() : { title: 'Nayi Report!', body: 'Report submit ho gayi hai.' };
+                    event.waitUntil(
+                        self.registration.showNotification(data.title, {
+                            body: data.body,
+                            icon: 'https://cdn-icons-png.flaticon.com/512/3602/3602145.png',
+                            vibrate: [200, 100, 200, 100, 400],
+                            sound: 'default'
+                        })
+                    );
+                });
+            `)).catch(err => console.log('SW registration error:', err));
+        }
+
+        function unlockAudioOnInteraction() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) audioCtx = new AudioContext();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
 
         function playLoudLongSmoothBell() {
             try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (!AudioContext) return;
-                const ctx = new AudioContext();
+                unlockAudioOnInteraction();
+                if (!audioCtx) return;
 
                 const sequence = [
                     { f: 523.25, delay: 0.0,  len: 0.6 },
@@ -202,20 +229,20 @@
                 ];
 
                 sequence.forEach(item => {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
 
                     osc.type = 'sine';
                     osc.frequency.value = item.f;
 
-                    const start = ctx.currentTime + item.delay;
+                    const start = audioCtx.currentTime + item.delay;
 
                     gain.gain.setValueAtTime(0, start);
                     gain.gain.linearRampToValueAtTime(0.5, start + 0.04);
                     gain.gain.exponentialRampToValueAtTime(0.0001, start + item.len);
 
                     osc.connect(gain);
-                    gain.connect(ctx.destination);
+                    gain.connect(audioCtx.destination);
 
                     osc.start(start);
                     osc.stop(start + item.len);
@@ -241,18 +268,15 @@
         }
 
         function enableSoundAndPermission() {
+            unlockAudioOnInteraction();
             playLoudLongSmoothBell();
 
             if ("Notification" in window) {
-                if (Notification.permission === "granted") {
-                    showToast("Loud Bell Sound Active!");
-                } else if (Notification.permission !== "denied") {
-                    Notification.requestPermission().then(permission => {
-                        if (permission === "granted") {
-                            showToast("Sound & Alerts Enabled!");
-                        }
-                    });
-                }
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        showToast("Background & Sound Alerts Active!");
+                    }
+                });
             }
         }
 
@@ -341,7 +365,6 @@
             });
         }
 
-        // DIRECT EASY DELETE FOR MADAM
         function deleteReport(docId) {
             if (confirm("Kya aap is report ko Firebase se delete karna chahti hain?")) {
                 db.collection('reports').doc(docId).delete().then(() => {
@@ -406,10 +429,22 @@
 
         function showDesktopNotification(title, body) {
             if ("Notification" in window && Notification.permission === "granted") {
-                new Notification(title, {
-                    body: body,
-                    icon: 'https://cdn-icons-png.flaticon.com/512/3602/3602145.png'
-                });
+                if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.ready.then(registration => {
+                        registration.showNotification(title, {
+                            body: body,
+                            icon: 'https://cdn-icons-png.flaticon.com/512/3602/3602145.png',
+                            vibrate: [200, 100, 200, 100, 400],
+                            requireInteraction: true
+                        });
+                    });
+                } else {
+                    new Notification(title, {
+                        body: body,
+                        icon: 'https://cdn-icons-png.flaticon.com/512/3602/3602145.png',
+                        requireInteraction: true
+                    });
+                }
             }
         }
 
