@@ -2,72 +2,126 @@
 <html lang="ur">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>School Daily Class Report System</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Firebase SDKs (Firestore) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <style>
+        .chip-btn {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            text-align: center;
+            width: 100%;
+        }
+        .chip-btn.selected {
+            background-color: #4f46e5 !important;
+            color: #ffffff !important;
+            border-color: #4f46e5 !important;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+            font-weight: 700;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 font-sans min-h-screen">
+<body class="bg-gray-100 font-sans min-h-screen text-gray-800">
 
-    <!-- Notification Sound (Clear Multi-tone Bell/Chime) -->
+    <!-- Backup Audio Tag (High Quality Long Chime) -->
     <audio id="notifSound" preload="auto">
-        <source src="https://assets.mixkit.co/active_storage/sfx/1516/1516-preview.mp3" type="audio/mpeg">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- Top Navigation Bar (Mobile Responsive) -->
+    <!-- Top Navigation Bar -->
     <nav class="bg-indigo-700 text-white p-3 sm:p-4 shadow-lg flex flex-col sm:flex-row justify-between items-center gap-3">
         <h1 class="text-lg sm:text-xl font-bold text-center sm:text-left">School Reporting Portal</h1>
         <div class="flex space-x-2 w-full sm:w-auto justify-center">
-            <button onclick="switchTab('coordinator')" class="flex-1 sm:flex-none bg-indigo-800 hover:bg-indigo-900 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition text-center">Coordinator View</button>
-            <button onclick="switchTab('madam')" class="flex-1 sm:flex-none bg-indigo-800 hover:bg-indigo-900 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition relative text-center">
+            <button onclick="switchTab('coordinator')" class="flex-1 sm:flex-none bg-indigo-800 hover:bg-indigo-900 px-4 py-2 rounded-lg text-sm font-semibold transition text-center shadow-sm">Coordinator View</button>
+            <button onclick="switchTab('madam')" class="flex-1 sm:flex-none bg-indigo-800 hover:bg-indigo-900 px-4 py-2 rounded-lg text-sm font-semibold transition relative text-center shadow-sm">
                 Madam View
                 <span id="notifBadge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full animate-pulse">New</span>
             </button>
         </div>
     </nav>
 
-    <div class="max-w-4xl mx-auto p-3 sm:p-6">
+    <div class="max-w-3xl mx-auto p-3 sm:p-6">
 
         <!-- ================= COORDINATOR SECTION ================= -->
-        <section id="coordinatorTab" class="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-200">
-            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 pb-2 border-b">Coordinator Daily Report Form</h2>
+        <section id="coordinatorTab" class="space-y-4">
+            <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-200 text-center">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Coordinator Daily Report Form</h2>
+                <p class="text-xs sm:text-sm text-gray-500 mt-1">Please fill out all steps below to submit the class report.</p>
+            </div>
             
             <form id="reportForm" onsubmit="submitReport(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Teacher Name</label>
-                    <input type="text" id="teacherName" required placeholder="Enter Teacher Name" class="w-full p-2.5 sm:p-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                </div>
+                
+                <input type="hidden" id="teacherName" required>
+                <input type="hidden" id="className" required>
+                <input type="hidden" id="subjectName" required>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Class & Section</label>
-                        <select id="className" required class="w-full p-2.5 sm:p-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                            <option value="">Select Class</option>
-                            <option value="Nursery">Nursery</option>
-                            <option value="Prep">Prep</option>
-                            <option value="Class 1">Class 1</option>
-                            <option value="Class 2">Class 2</option>
-                            <option value="Class 3">Class 3</option>
-                            <option value="Class 4">Class 4</option>
-                            <option value="Class 5">Class 5</option>
-                        </select>
+                <!-- STEP 1: Teacher Selection -->
+                <div class="bg-white rounded-xl p-4 sm:p-5 border border-gray-200 shadow-sm">
+                    <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+                        <span class="bg-indigo-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">Step 1</span>
+                        <label class="text-sm sm:text-base font-bold text-gray-800">Select Teacher Name</label>
                     </div>
-
-                    <div>
-                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Subject / Period</label>
-                        <input type="text" id="subjectName" required placeholder="e.g. Mathematics - 2nd Period" class="w-full p-2.5 sm:p-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5" id="teacherGroup">
+                        <button type="button" onclick="selectChip('teacher', 'Miss Bushra', this)" class="chip-btn teacher-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2.5 px-2 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Miss Bushra</button>
+                        <button type="button" onclick="selectChip('teacher', 'Miss Mahnoor', this)" class="chip-btn teacher-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2.5 px-2 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Miss Mahnoor</button>
+                        <button type="button" onclick="selectChip('teacher', 'Sir Ali', this)" class="chip-btn teacher-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2.5 px-2 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Sir Ali</button>
+                        <button type="button" onclick="selectChip('teacher', 'Sir Asim', this)" class="chip-btn teacher-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2.5 px-2 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Sir Asim</button>
+                        <button type="button" onclick="selectChip('teacher', 'Miss Nimra', this)" class="chip-btn teacher-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2.5 px-2 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Miss Nimra</button>
+                        <button type="button" onclick="selectChip('teacher', 'Other', this)" class="chip-btn teacher-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2.5 px-2 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Other</button>
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Lesson / Work Done in Class</label>
-                    <textarea id="workDone" rows="4" required placeholder="Details of what was taught today..." class="w-full p-2.5 sm:p-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+                <!-- STEP 2: Class Selection -->
+                <div class="bg-white rounded-xl p-4 sm:p-5 border border-gray-200 shadow-sm">
+                    <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+                        <span class="bg-indigo-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">Step 2</span>
+                        <label class="text-sm sm:text-base font-bold text-gray-800">Class & Section</label>
+                    </div>
+                    <div class="grid grid-cols-3 sm:grid-cols-5 gap-2" id="classGroup">
+                        <button type="button" onclick="selectChip('class', 'Nursery', this)" class="chip-btn class-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Nursery</button>
+                        <button type="button" onclick="selectChip('class', 'Prep', this)" class="chip-btn class-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Prep</button>
+                        <button type="button" onclick="selectChip('class', 'Class 1', this)" class="chip-btn class-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Class 1</button>
+                        <button type="button" onclick="selectChip('class', 'Class 2', this)" class="chip-btn class-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Class 2</button>
+                        <button type="button" onclick="selectChip('class', 'Class 3', this)" class="chip-btn class-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Class 3</button>
+                        <button type="button" onclick="selectChip('class', 'Class 4', this)" class="chip-btn class-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Class 4</button>
+                        <button type="button" onclick="selectChip('class', 'Class 5', this)" class="chip-btn class-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Class 5</button>
+                        <button type="button" onclick="selectChip('class', 'Class 6', this)" class="chip-btn class-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Class 6</button>
+                        <button type="button" onclick="selectChip('class', 'Class 7', this)" class="chip-btn class-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Class 7</button>
+                        <button type="button" onclick="selectChip('class', 'Class 8', this)" class="chip-btn class-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Class 8</button>
+                    </div>
                 </div>
 
-                <button type="submit" id="submitBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 text-sm sm:text-base rounded-lg shadow transition">
+                <!-- STEP 3: Subject Selection -->
+                <div class="bg-white rounded-xl p-4 sm:p-5 border border-gray-200 shadow-sm">
+                    <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+                        <span class="bg-indigo-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">Step 3</span>
+                        <label class="text-sm sm:text-base font-bold text-gray-800">Subject / Period</label>
+                    </div>
+                    <div class="grid grid-cols-3 sm:grid-cols-3 gap-2" id="subjectGroup">
+                        <button type="button" onclick="selectChip('subject', 'English', this)" class="chip-btn subject-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">English</button>
+                        <button type="button" onclick="selectChip('subject', 'Urdu', this)" class="chip-btn subject-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Urdu</button>
+                        <button type="button" onclick="selectChip('subject', 'Math', this)" class="chip-btn subject-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Math</button>
+                        <button type="button" onclick="selectChip('subject', 'Islamiyat', this)" class="chip-btn subject-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Islamiyat</button>
+                        <button type="button" onclick="selectChip('subject', 'Science', this)" class="chip-btn subject-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Science</button>
+                        <button type="button" onclick="selectChip('subject', 'S.ST', this)" class="chip-btn subject-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">S.ST</button>
+                    </div>
+                </div>
+
+                <!-- STEP 4: Work Done Input -->
+                <div class="bg-white rounded-xl p-4 sm:p-5 border border-gray-200 shadow-sm">
+                    <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+                        <span class="bg-indigo-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">Step 4</span>
+                        <label class="text-sm sm:text-base font-bold text-gray-800">Work Done in Class</label>
+                    </div>
+                    <textarea id="workDone" rows="4" required placeholder="Details of what was taught today..." class="w-full p-3 text-sm sm:text-base border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none"></textarea>
+                </div>
+
+                <button type="submit" id="submitBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 text-base sm:text-lg rounded-xl shadow-lg transition">
                     Submit Report to Madam
                 </button>
             </form>
@@ -78,7 +132,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4 pb-2 border-b">
                 <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Madam Dashboard</h2>
                 <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
-                    <button onclick="enableSoundAndPermission()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-xs px-2.5 py-1.5 rounded-lg font-semibold transition flex items-center gap-1 shadow-sm">
+                    <button onclick="enableSoundAndPermission()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-xs px-3 py-2 rounded-lg font-semibold transition flex items-center gap-1 shadow-sm">
                         🔔 Enable Sound & Alerts
                     </button>
                     <span id="reportCount" class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap">0 Reports</span>
@@ -99,7 +153,6 @@
     </div>
 
     <script>
-        // FIREBASE CONFIGURATION
         const firebaseConfig = {
             apiKey: "AIzaSyBD_WQ8tDZfd_7ZElCFWfH2soKjn3FIIZI",
             authDomain: "syllabus-c7fd7.firebaseapp.com",
@@ -109,26 +162,74 @@
             appId: "1:337710632873:web:f9abae923620c9e0a3feb8"
         };
 
-        // Initialize Firebase & Firestore
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         let initialLoadDone = false;
 
-        function enableSoundAndPermission() {
-            const audio = document.getElementById('notifSound');
-            audio.play().then(() => {
-                audio.pause();
+        // HIGH QUALITY SYNTHESIZED LONG ALERT CHIME
+        function playLongLoudChime() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) {
+                    document.getElementById('notifSound').play();
+                    return;
+                }
+                const ctx = new AudioContext();
+                
+                // Frequency pattern for a nice melodious 3-tone notification
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                const times = [0, 0.18, 0.36, 0.55];
+
+                notes.forEach((freq, index) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+
+                    const startTime = ctx.currentTime + times[index];
+                    const duration = index === 3 ? 1.2 : 0.4; // Make the last tone long and ringing
+
+                    gain.gain.setValueAtTime(0, startTime);
+                    gain.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.start(startTime);
+                    osc.stop(startTime + duration);
+                });
+            } catch(e) {
+                // Fallback to MP3
+                const audio = document.getElementById('notifSound');
                 audio.currentTime = 0;
-            }).catch(e => console.log("Audio unlocked"));
+                audio.play().catch(err => console.log(err));
+            }
+        }
+
+        function selectChip(category, value, element) {
+            const chips = document.querySelectorAll(`.${category}-chip`);
+            chips.forEach(chip => chip.classList.remove('selected'));
+
+            element.classList.add('selected');
+
+            if(category === 'teacher') document.getElementById('teacherName').value = value;
+            if(category === 'class') document.getElementById('className').value = value;
+            if(category === 'subject') document.getElementById('subjectName').value = value;
+        }
+
+        function enableSoundAndPermission() {
+            playLongLoudChime();
 
             if ("Notification" in window) {
                 if (Notification.permission === "granted") {
-                    showToast("Alerts and Sound active hain!");
+                    showToast("Alerts & Sweet Chime Sound Active!");
                 } else if (Notification.permission !== "denied") {
                     Notification.requestPermission().then(permission => {
                         if (permission === "granted") {
-                            showToast("Sound aur Desktop Alerts enable ho chuke hain!");
+                            showToast("Sound aur Desktop Alerts Active ho chuke hain!");
                         }
                     });
                 }
@@ -148,14 +249,24 @@
 
         function submitReport(e) {
             e.preventDefault();
+
+            const teacher = document.getElementById('teacherName').value;
+            const className = document.getElementById('className').value;
+            const subject = document.getElementById('subjectName').value;
+
+            if(!teacher || !className || !subject) {
+                alert("Please Teacher, Class aur Subject zaroor select karein!");
+                return;
+            }
+
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
             submitBtn.innerText = "Submitting...";
 
             const newReport = {
-                teacher: document.getElementById('teacherName').value,
-                class: document.getElementById('className').value,
-                subject: document.getElementById('subjectName').value,
+                teacher: teacher,
+                class: className,
+                subject: subject,
                 work: document.getElementById('workDone').value,
                 timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -164,6 +275,12 @@
             db.collection('reports').add(newReport).then(() => {
                 alert("Report Madam tak bhej di gayi hai!");
                 document.getElementById('reportForm').reset();
+                
+                document.querySelectorAll('.chip-btn').forEach(chip => chip.classList.remove('selected'));
+                document.getElementById('teacherName').value = '';
+                document.getElementById('className').value = '';
+                document.getElementById('subjectName').value = '';
+
                 submitBtn.disabled = false;
                 submitBtn.innerText = "Submit Report to Madam";
             }).catch(error => {
@@ -209,7 +326,7 @@
             if (initialLoadDone && snapshot.docChanges().some(change => change.type === "added")) {
                 document.getElementById('notifBadge').classList.remove('hidden');
                 
-                playNotificationSound();
+                playLongLoudChime();
 
                 const msg = `${latestDoc ? latestDoc.teacher : 'Teacher'} ne ${latestDoc ? latestDoc.class : 'class'} ki report submit ki hai.`;
                 showToast(msg);
@@ -218,12 +335,6 @@
 
             initialLoadDone = true;
         });
-
-        function playNotificationSound() {
-            const sound = document.getElementById('notifSound');
-            sound.currentTime = 0;
-            sound.play().catch(e => console.log("Sound waiting for user interaction"));
-        }
 
         function showDesktopNotification(title, body) {
             if ("Notification" in window && Notification.permission === "granted") {
