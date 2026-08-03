@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>School Daily Class Report System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDKs (Firestore) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <style>
+        .chip-btn {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            text-align: center;
+            width: 100%;
+        }
+        .chip-btn.selected {
+            background-color: #4f46e5 !important;
+            color: #ffffff !important;
+            border-color: #4f46e5 !important;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+            font-weight: 700;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans min-h-screen text-gray-800 pb-24" onclick="unlockAudioOnInteraction()">
+
+    <!-- Backup Audio Tag -->
+    <audio id="notifSound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Top Navigation Bar -->
+    <nav class="bg-indigo-700 text-white p-3 sm:p-4 shadow-lg flex flex-col sm:flex-row justify-between items-center gap-3 sticky top-0 z-40">
+        <h1 class="text-lg sm:text-xl font-bold text-center sm:text-left">School Reporting Portal</h1>
+        <div class="flex space-x-2 w-full sm:w-auto justify-center">
+            <button onclick="switchTab('coordinator')" class="flex-1 sm:flex-none bg-indigo-800 hover:bg-indigo-900 px-4 py-2 rounded-lg text-sm font-semibold transition text-center shadow-sm">Coordinator View</button>
+            <button onclick="switchTab('madam')" class="flex-1 sm:flex-none bg-indigo-800 hover:bg-indigo-900 px-4 py-2 rounded-lg text-sm font-semibold transition relative text-center shadow-sm">
+                Madam View
+                <span id="notifBadge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full animate-pulse">New</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="max-w-3xl mx-auto p-3 sm:p-6">
+
+        <!-- ================= COORDINATOR SECTION ================= -->
+        <section id="coordinatorTab" class="space-y-4">
+            <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-200 text-center">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Coordinator Daily Report Form</h2>
+                <p class="text-xs sm:text-sm text-gray-500 mt-1">Please fill out all steps below to submit the class report.</p>
+            </div>
+            
+            <form id="reportForm" onsubmit="submitReport(event)" class="space-y-4">
+                
+                <input type="hidden" id="teacherName" required>
+                <input type="hidden" id="className" required>
+                <input type="hidden" id="subjectName" required>
+
+                <!-- STEP 1: Teacher Selection -->
+                <div id="sec-step1" class="bg-white rounded-xl p-4 sm:p-5 border border-gray-200 shadow-sm transition-all">
+                    <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+                        <span class="bg-indigo-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">Step 1</span>
+                        <label class="text-sm sm:text-base font-bold text-gray-800">Select Teacher Name</label>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5" id="teacherGroup">
+                        <button type="button" onclick="selectChip('teacher', 'Miss Bushra', this)" class="chip-btn teacher-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2.5 px-2 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Miss Bushra</button>
+                        <button type="button" onclick="selectChip('teacher', 'Miss Mahnoor', this)" class="chip-btn teacher-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2.5 px-2 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Miss Mahnoor</button>
+                        <button type="button" onclick="selectChip('teacher', 'Sir Ali', this)" class="chip-btn teacher-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2.5 px-2 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Sir Ali</button>
+                        <button type="button" onclick="selectChip('teacher', 'Sir Asim', this)" class="chip-btn teacher-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2.5 px-2 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Sir Asim</button>
+                        <button type="button" onclick="selectChip('teacher', 'Miss Nimra', this)" class="chip-btn teacher-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2.5 px-2 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Miss Nimra</button>
+                        <button type="button" onclick="selectChip('teacher', 'Other', this)" class="chip-btn teacher-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2.5 px-2 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Other</button>
+                    </div>
+                </div>
+
+                <!-- STEP 2: Class Selection -->
+                <div id="sec-step2" class="bg-white rounded-xl p-4 sm:p-5 border border-gray-200 shadow-sm transition-all">
+                    <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+                        <span class="bg-indigo-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">Step 2</span>
+                        <label class="text-sm sm:text-base font-bold text-gray-800">Class & Section</label>
+                    </div>
+                    <div class="grid grid-cols-3 sm:grid-cols-5 gap-2" id="classGroup">
+                        <button type="button" onclick="selectChip('class', 'Nursery', this)" class="chip-btn class-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Nursery</button>
+                        <button type="button" onclick="selectChip('class', 'Prep', this)" class="chip-btn class-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Prep</button>
+                        <button type="button" onclick="selectChip('class', 'Class 1', this)" class="chip-btn class-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Class 1</button>
+                        <button type="button" onclick="selectChip('class', 'Class 2', this)" class="chip-btn class-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Class 2</button>
+                        <button type="button" onclick="selectChip('class', 'Class 3', this)" class="chip-btn class-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Class 3</button>
+                        <button type="button" onclick="selectChip('class', 'Class 4', this)" class="chip-btn class-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Class 4</button>
+                        <button type="button" onclick="selectChip('class', 'Class 5', this)" class="chip-btn class-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Class 5</button>
+                        <button type="button" onclick="selectChip('class', 'Class 6', this)" class="chip-btn class-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Class 6</button>
+                        <button type="button" onclick="selectChip('class', 'Class 7', this)" class="chip-btn class-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Class 7</button>
+                        <button type="button" onclick="selectChip('class', 'Class 8', this)" class="chip-btn class-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Class 8</button>
+                    </div>
+                </div>
+
+                <!-- STEP 3: Subject Selection -->
+                <div id="sec-step3" class="bg-white rounded-xl p-4 sm:p-5 border border-gray-200 shadow-sm transition-all">
+                    <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+                        <span class="bg-indigo-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">Step 3</span>
+                        <label class="text-sm sm:text-base font-bold text-gray-800">Subject / Period</label>
+                    </div>
+                    <div class="grid grid-cols-3 sm:grid-cols-3 gap-2" id="subjectGroup">
+                        <button type="button" onclick="selectChip('subject', 'English', this)" class="chip-btn subject-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">English</button>
+                        <button type="button" onclick="selectChip('subject', 'Urdu', this)" class="chip-btn subject-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Urdu</button>
+                        <button type="button" onclick="selectChip('subject', 'Math', this)" class="chip-btn subject-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Math</button>
+                        <button type="button" onclick="selectChip('subject', 'Islamiyat', this)" class="chip-btn subject-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Islamiyat</button>
+                        <button type="button" onclick="selectChip('subject', 'Science', this)" class="chip-btn subject-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">Science</button>
+                        <button type="button" onclick="selectChip('subject', 'S.ST', this)" class="chip-btn subject-chip border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium py-2 px-1 rounded-xl text-xs sm:text-sm hover:border-indigo-400">S.ST</button>
+                    </div>
+                </div>
+
+                <!-- STEP 4: Work Done Input -->
+                <div id="sec-step4" class="bg-white rounded-xl p-4 sm:p-5 border border-gray-200 shadow-sm transition-all">
+                    <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+                        <span class="bg-indigo-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">Step 4</span>
+                        <label class="text-sm sm:text-base font-bold text-gray-800">Lesson / Work Done in Class</label>
+                    </div>
+                    <textarea id="workDone" rows="3" required placeholder="Details of what was taught today..." class="w-full p-3 text-sm sm:text-base border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none"></textarea>
+                </div>
+
+                <!-- FLOATING STICKY SUBMIT BUTTON CONTAINER -->
+                <div class="fixed bottom-0 left-0 right-0 p-3 bg-white/95 backdrop-blur border-t border-gray-200 shadow-2xl z-30 flex justify-center">
+                    <div class="max-w-3xl w-full">
+                        <button type="submit" id="submitBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 text-base sm:text-lg rounded-xl shadow-lg transition transform active:scale-95">
+                            Submit Report to Madam
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+        </section>
+
+        <!-- ================= MADAM / PRINCIPAL SECTION ================= -->
+        <section id="madamTab" class="hidden bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-200">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4 pb-2 border-b">
+                <div class="flex items-center gap-2">
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Madam Dashboard</h2>
+                    <button onclick="logoutMadam()" class="text-xs bg-red-100 hover:bg-red-200 text-red-600 px-2 py-1 rounded font-semibold transition" title="Logout Madam">Logout 🔒</button>
+                </div>
+                <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                    <button onclick="enableSoundAndPermission()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-xs px-3 py-2 rounded-lg font-semibold transition flex items-center gap-1 shadow-sm">
+                        🔔 Enable Sound & Alerts
+                    </button>
+                    <span id="reportCount" class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap">0 Reports</span>
+                </div>
+            </div>
+
+            <!-- Toast Notification Banner -->
+            <div id="toastNotif" class="hidden mb-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-3 sm:p-4 rounded shadow-sm text-sm" role="alert">
+                <p class="font-bold">Naya Notification!</p>
+                <p id="toastMsg">Aik naye period ki report submit hui hai.</p>
+            </div>
+
+            <div id="reportsList" class="space-y-3 sm:space-y-4">
+                <p class="text-gray-500 text-center py-6 text-sm">Loading reports...</p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- MADAM LOGIN MODAL -->
+    <div id="loginModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 text-center space-y-4">
+            <h3 class="text-xl font-bold text-gray-800">Madam Login</h3>
+            <p class="text-xs text-gray-500">Madam View access karne ke liye Login karein</p>
+            <div class="space-y-3">
+                <input type="text" id="loginUser" placeholder="Username" class="w-full p-2.5 text-sm border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-600">
+                <input type="password" id="loginPass" placeholder="Password" class="w-full p-2.5 text-sm border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-600">
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="closeLoginModal()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 text-sm rounded-lg">Cancel</button>
+                <button onclick="verifyMadamLogin()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 text-sm rounded-lg shadow">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBD_WQ8tDZfd_7ZElCFWfH2soKjn3FIIZI",
+            authDomain: "syllabus-c7fd7.firebaseapp.com",
+            projectId: "syllabus-c7fd7",
+            storageBucket: "syllabus-c7fd7.firebasestorage.app",
+            messagingSenderId: "337710632873",
+            appId: "1:337710632873:web:f9abae923620c9e0a3feb8"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let initialLoadDone = false;
+        let isMadamLoggedIn = false;
+        let audioCtx = null;
+
+        // Register Service Worker for Background Alerts
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:text/javascript;charset=utf-8,' + encodeURIComponent(`
+                self.addEventListener('push', function(event) {
+                    const data = event.data ? event.data.json() : { title: 'Nayi Report!', body: 'Report submit ho gayi hai.' };
+                    event.waitUntil(
+                        self.registration.showNotification(data.title, {
+                            body: data.body,
+                            icon: 'https://cdn-icons-png.flaticon.com/512/3602/3602145.png',
+                            vibrate: [200, 100, 200, 100, 400],
+                            sound: 'default'
+                        })
+                    );
+                });
+            `)).catch(err => console.log('SW registration error:', err));
+        }
+
+        function unlockAudioOnInteraction() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) audioCtx = new AudioContext();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playLoudLongSmoothBell() {
+            try {
+                unlockAudioOnInteraction();
+                if (!audioCtx) return;
+
+                const sequence = [
+                    { f: 523.25, delay: 0.0,  len: 0.6 },
+                    { f: 659.25, delay: 0.25, len: 0.6 },
+                    { f: 783.99, delay: 0.50, len: 0.6 },
+                    { f: 1046.50, delay: 0.75, len: 0.8 },
+                    { f: 1318.51, delay: 1.05, len: 2.0 }
+                ];
+
+                sequence.forEach(item => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+
+                    osc.type = 'sine';
+                    osc.frequency.value = item.f;
+
+                    const start = audioCtx.currentTime + item.delay;
+
+                    gain.gain.setValueAtTime(0, start);
+                    gain.gain.linearRampToValueAtTime(0.5, start + 0.04);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, start + item.len);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc.start(start);
+                    osc.stop(start + item.len);
+                });
+            } catch(e) {
+                const audio = document.getElementById('notifSound');
+                if(audio) {
+                    audio.currentTime = 0;
+                    audio.play().catch(err => console.log(err));
+                }
+            }
+        }
+
+        function selectChip(category, value, element) {
+            const chips = document.querySelectorAll(`.${category}-chip`);
+            chips.forEach(chip => chip.classList.remove('selected'));
+
+            element.classList.add('selected');
+
+            if(category === 'teacher') {
+                document.getElementById('teacherName').value = value;
+                scrollToNext('sec-step2');
+            }
+            if(category === 'class') {
+                document.getElementById('className').value = value;
+                scrollToNext('sec-step3');
+            }
+            if(category === 'subject') {
+                document.getElementById('subjectName').value = value;
+                scrollToNext('sec-step4');
+            }
+        }
+
+        function scrollToNext(nextElementId) {
+            const target = document.getElementById(nextElementId);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function enableSoundAndPermission() {
+            unlockAudioOnInteraction();
+            playLoudLongSmoothBell();
+
+            if ("Notification" in window) {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        showToast("Background & Sound Alerts Active!");
+                    }
+                });
+            }
+        }
+
+        function switchTab(tab) {
+            if (tab === 'coordinator') {
+                document.getElementById('coordinatorTab').classList.remove('hidden');
+                document.getElementById('madamTab').classList.add('hidden');
+            } else {
+                if (isMadamLoggedIn) {
+                    document.getElementById('coordinatorTab').classList.add('hidden');
+                    document.getElementById('madamTab').classList.remove('hidden');
+                    document.getElementById('notifBadge').classList.add('hidden');
+                } else {
+                    document.getElementById('loginModal').classList.remove('hidden');
+                }
+            }
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('loginUser').value = '';
+            document.getElementById('loginPass').value = '';
+        }
+
+        function verifyMadamLogin() {
+            const u = document.getElementById('loginUser').value.trim();
+            const p = document.getElementById('loginPass').value.trim();
+
+            if (u === "a" && p === "1") {
+                isMadamLoggedIn = true;
+                closeLoginModal();
+                document.getElementById('coordinatorTab').classList.add('hidden');
+                document.getElementById('madamTab').classList.remove('hidden');
+                document.getElementById('notifBadge').classList.add('hidden');
+            } else {
+                alert("❌ Wrong Username or Password!");
+            }
+        }
+
+        function logoutMadam() {
+            isMadamLoggedIn = false;
+            switchTab('coordinator');
+            alert("Madam Logout ho chuki hain!");
+        }
+
+        function submitReport(e) {
+            e.preventDefault();
+
+            const teacher = document.getElementById('teacherName').value;
+            const className = document.getElementById('className').value;
+            const subject = document.getElementById('subjectName').value;
+
+            if(!teacher || !className || !subject) {
+                alert("Please Teacher, Class aur Subject zaroor select karein!");
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Submitting...";
+
+            const newReport = {
+                teacher: teacher,
+                class: className,
+                subject: subject,
+                work: document.getElementById('workDone').value,
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            db.collection('reports').add(newReport).then(() => {
+                alert("Report Madam tak bhej di gayi hai!");
+                document.getElementById('reportForm').reset();
+                
+                document.querySelectorAll('.chip-btn').forEach(chip => chip.classList.remove('selected'));
+                document.getElementById('teacherName').value = '';
+                document.getElementById('className').value = '';
+                document.getElementById('subjectName').value = '';
+
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Submit Report to Madam";
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }).catch(error => {
+                alert("Error: " + error.message);
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Submit Report to Madam";
+            });
+        }
+
+        function deleteReport(docId) {
+            if (confirm("Kya aap is report ko Firebase se delete karna chahti hain?")) {
+                db.collection('reports').doc(docId).delete().then(() => {
+                    showToast("Report successfully delete ho gayi!");
+                }).catch(error => {
+                    alert("Delete error: " + error.message);
+                });
+            }
+        }
+
+        db.collection('reports').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
+            const reportsList = document.getElementById('reportsList');
+            reportsList.innerHTML = '';
+
+            if (snapshot.empty) {
+                reportsList.innerHTML = '<p class="text-gray-500 text-center py-6 text-sm">Abhi tak koi report submit nahi hui.</p>';
+                document.getElementById('reportCount').innerText = '0 Reports';
+                return;
+            }
+
+            document.getElementById('reportCount').innerText = `${snapshot.size} Reports Total`;
+
+            let latestDoc = null;
+
+            snapshot.forEach((doc, index) => {
+                const report = doc.data();
+                const docId = doc.id;
+                if (index === 0) latestDoc = report;
+
+                const card = `
+                    <div class="bg-gray-50 border-l-4 border-indigo-600 p-3 sm:p-4 rounded-r-lg shadow-sm relative">
+                        <div class="flex justify-between items-start mb-1 sm:mb-2 gap-2">
+                            <div>
+                                <h3 class="font-bold text-gray-800 text-base sm:text-lg">${report.teacher}</h3>
+                                <p class="text-xs sm:text-sm font-semibold text-indigo-600">${report.class} - ${report.subject}</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] sm:text-xs bg-gray-200 text-gray-600 px-2 py-0.5 sm:py-1 rounded whitespace-nowrap">${report.timestamp || ''}</span>
+                                <button onclick="deleteReport('${docId}')" title="Delete Report" class="bg-red-100 hover:bg-red-200 text-red-600 p-1.5 rounded-lg text-xs transition font-semibold">
+                                    🗑️ Delete
+                                </button>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 text-xs sm:text-sm mt-2 bg-white p-2.5 sm:p-3 rounded border border-gray-200 whitespace-pre-line">${report.work}</p>
+                    </div>
+                `;
+                reportsList.innerHTML += card;
+            });
+
+            if (initialLoadDone && snapshot.docChanges().some(change => change.type === "added")) {
+                document.getElementById('notifBadge').classList.remove('hidden');
+                
+                playLoudLongSmoothBell();
+
+                const msg = `${latestDoc ? latestDoc.teacher : 'Teacher'} ne ${latestDoc ? latestDoc.class : 'class'} ki report submit ki hai.`;
+                showToast(msg);
+                showDesktopNotification("Nayi Class Report!", msg);
+            }
+
+            initialLoadDone = true;
+        });
+
+        function showDesktopNotification(title, body) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.ready.then(registration => {
+                        registration.showNotification(title, {
+                            body: body,
+                            icon: 'https://cdn-icons-png.flaticon.com/512/3602/3602145.png',
+                            vibrate: [200, 100, 200, 100, 400],
+                            requireInteraction: true
+                        });
+                    });
+                } else {
+                    new Notification(title, {
+                        body: body,
+                        icon: 'https://cdn-icons-png.flaticon.com/512/3602/3602145.png',
+                        requireInteraction: true
+                    });
+                }
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toastNotif');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 6000);
+        }
+    </script>
+</body>
+</html>
