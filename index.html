@@ -237,12 +237,12 @@
         let videoPlaylist = [];
         let loadedVideoIds = new Set();
         let currentIndex = -1;
+        let isNavigating = false;
 
         const feedContainer = document.getElementById('feedContainer');
         const touchLayer = document.getElementById('touchLayer');
 
         async function fetchMoreVideos() {
-            // Pick a random topic to get unique content every time
             const topic = safeSearchTopics[Math.floor(Math.random() * safeSearchTopics.length)];
             const apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=${encodeURIComponent(topic)}&type=video&videoEmbeddable=true&safeSearch=strict&key=${YOUTUBE_API_KEY}`;
 
@@ -271,58 +271,55 @@
         async function renderVideo(index) {
             if (index < 0 || index >= videoPlaylist.length) return;
 
-            // Render existing or new card
-            let card = document.getElementById(`card-${index}`);
-            if (!card) {
-                const item = videoPlaylist[index];
-                card = document.createElement('div');
-                card.id = `card-${index}`;
-                card.className = 'video-card';
-                card.innerHTML = `
+            // Stop all existing video cards by cleaning container or re-creating iframe source to enforce Autoplay
+            const item = videoPlaylist[index];
+            feedContainer.innerHTML = `
+                <div class="video-card active" id="card-${index}">
                     <iframe id="iframe-${index}"
-                            src="https://www.youtube.com/embed/${item.id}?autoplay=1&controls=1&rel=0&playsinline=1" 
+                            src="https://www.youtube.com/embed/${item.id}?autoplay=1&mute=0&enablejsapi=1&rel=0&playsinline=1" 
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                             allowfullscreen></iframe>
                     <div class="video-info-overlay">
                         <div class="video-title">${item.title}</div>
                         <div class="channel-name">📺 ${item.channel}</div>
                     </div>
-                `;
-                feedContainer.appendChild(card);
-            }
+                </div>
+            `;
 
-            // Hide all and show current active
-            document.querySelectorAll('.video-card').forEach(c => c.classList.remove('active'));
-            card.classList.add('active');
-
-            // Hide loading overlay
-            const loadingBox = document.getElementById('loadingState');
-            if(loadingBox) loadingBox.style.display = 'none';
-
-            // Auto fetch more when near end
+            // Auto fetch more videos when near end
             if (videoPlaylist.length - index <= 3) {
                 fetchMoreVideos();
             }
         }
 
         async function playNextVideo() {
+            if (isNavigating) return;
+            isNavigating = true;
+
             if (currentIndex + 1 < videoPlaylist.length) {
                 currentIndex++;
-                renderVideo(currentIndex);
+                await renderVideo(currentIndex);
             } else {
                 await fetchMoreVideos();
                 if (currentIndex + 1 < videoPlaylist.length) {
                     currentIndex++;
-                    renderVideo(currentIndex);
+                    await renderVideo(currentIndex);
                 }
             }
+
+            setTimeout(() => { isNavigating = false; }, 300);
         }
 
-        function playPreviousVideo() {
+        async function playPreviousVideo() {
+            if (isNavigating) return;
+            isNavigating = true;
+
             if (currentIndex > 0) {
                 currentIndex--;
-                renderVideo(currentIndex);
+                await renderVideo(currentIndex);
             }
+
+            setTimeout(() => { isNavigating = false; }, 300);
         }
 
         async function initFeed() {
@@ -353,10 +350,14 @@
             }
         }, { passive: true });
 
-        // MOUSE WHEEL SCROLL FOR PC
+        // MOUSE WHEEL SCROLL FOR PC (Debounced)
+        let wheelTimeout;
         window.addEventListener('wheel', (e) => {
-            if (e.deltaY > 0) playNextVideo();
-            else playPreviousVideo();
+            clearTimeout(wheelTimeout);
+            wheelTimeout = setTimeout(() => {
+                if (e.deltaY > 0) playNextVideo();
+                else playPreviousVideo();
+            }, 50);
         });
 
         initFeed();
