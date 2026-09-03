@@ -58,18 +58,26 @@
             font-weight: 700;
         }
 
-        /* FEED STREAM */
-        #dynamicFeed {
+        /* FEED STREAM CONTAINER */
+        #feedWrapper {
             width: 100%;
             height: 100%;
-            position: relative;
-            transition: transform 0.35s ease-out;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
         }
+
+        /* Hide Scrollbar */
+        #feedWrapper::-webkit-scrollbar { display: none; }
+        #feedWrapper { -ms-overflow-style: none; scrollbar-width: none; }
 
         .video-post {
             position: relative;
             width: 100%;
-            height: 100%;
+            height: 100vh;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
             background-color: #000;
             overflow: hidden;
         }
@@ -78,14 +86,13 @@
             width: 100%;
             height: 100%;
             border: none;
-            pointer-events: auto;
         }
 
         /* OVERLAY INFO */
         .video-info-overlay {
             position: absolute;
             left: 0;
-            bottom: 56px;
+            bottom: 60px;
             width: 100%;
             padding: 20px 16px;
             z-index: 15;
@@ -94,6 +101,32 @@
         }
         .video-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; line-height: 1.3; }
         .channel-name { font-size: 12px; color: #ffd700; font-weight: 600; }
+
+        /* SCROLL CONTROLS FOR EASY SWIPE */
+        .scroll-btn-wrapper {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 90;
+        }
+        .scroll-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #ffd700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
 
         /* NAVIGATION BAR */
         .bottom-nav-bar {
@@ -104,7 +137,6 @@
             height: 56px;
             background: rgba(13, 13, 18, 0.95);
             backdrop-filter: blur(10px);
-            border-top: none;
             z-index: 100;
             display: flex;
             justify-content: space-around;
@@ -128,7 +160,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100%;
+            height: 100vh;
             color: #ffd700;
             font-size: 14px;
             gap: 10px;
@@ -151,10 +183,16 @@
             <div class="safe-badge">🛡️ 100% Safe Kids Zone</div>
         </div>
 
-        <!-- Video Stream -->
-        <div id="dynamicFeed">
+        <!-- Scroll Buttons for Kids -->
+        <div class="scroll-btn-wrapper">
+            <button class="scroll-btn" onclick="scrollFeed('up')">▲</button>
+            <button class="scroll-btn" onclick="scrollFeed('down')">▼</button>
+        </div>
+
+        <!-- Video Stream Container -->
+        <div id="feedWrapper">
             <div class="loading-box">
-                <span>✨ Auto-Loading Safe & Educational Content...</span>
+                <span>✨ Auto-Loading Safe Content...</span>
             </div>
         </div>
 
@@ -172,10 +210,8 @@
     </div>
 
     <script>
-        // 🔑 Apni Free Google YouTube Data API Key Yahan Dalein:
         const YOUTUBE_API_KEY = "AIzaSyBjFaFHtHp2auL96X20FR3ivu5_E3OzFdw";
 
-        // Safe & Educational Search Topics (Automatic Auto-Fetch Categories)
         const safeSearchQueries = [
             "Islamic moral stories for kids Urdu animated",
             "Urdu nursery rhymes moral lessons",
@@ -184,18 +220,12 @@
             "Prophet stories for children Urdu"
         ];
 
-        const container = document.getElementById('appContainer');
-        const feed = document.getElementById('dynamicFeed');
-        
-        let currentFeedIndex = 0;
-        let totalVideos = 0;
+        const feedWrapper = document.getElementById('feedWrapper');
 
         async function fetchEducationalVideos() {
-            feed.innerHTML = '<div class="loading-box"><span>✨ Searching Safe Content...</span></div>';
+            feedWrapper.innerHTML = '<div class="loading-box"><span>✨ Searching Safe Content...</span></div>';
             
-            // Randomly select 1 safe topic
             const selectedTopic = safeSearchQueries[Math.floor(Math.random() * safeSearchQueries.length)];
-            // videoEmbeddable=true filter add kar diya hai taa ke Error 153 na aaye
             const apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=15&q=${encodeURIComponent(selectedTopic)}&type=video&videoEmbeddable=true&safeSearch=strict&key=${YOUTUBE_API_KEY}`;
 
             try {
@@ -203,13 +233,11 @@
                 const data = await response.json();
 
                 if (!data.items || data.items.length === 0) {
-                    feed.innerHTML = '<div class="loading-box">No videos found. Check API key.</div>';
+                    feedWrapper.innerHTML = '<div class="loading-box">No videos found. Check API key.</div>';
                     return;
                 }
 
-                feed.innerHTML = '';
-                totalVideos = data.items.length;
-                currentFeedIndex = 0;
+                feedWrapper.innerHTML = '';
 
                 data.items.forEach((item, index) => {
                     const videoId = item.id.videoId;
@@ -218,11 +246,9 @@
 
                     const postBlock = document.createElement('div');
                     postBlock.className = 'video-post';
-                    postBlock.style.height = container.clientHeight + 'px';
 
-                    // Standard YouTube Embed URL with correct parameters
                     postBlock.innerHTML = `
-                        <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=${index === 0 ? 1 : 0}&enablejsapi=1&controls=0&rel=0&playsinline=1" 
+                        <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=${index === 0 ? 1 : 0}&controls=1&rel=0&playsinline=1" 
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                                 allowfullscreen></iframe>
                         
@@ -231,41 +257,30 @@
                             <div class="channel-name">📺 ${channel}</div>
                         </div>
                     `;
-                    feed.appendChild(postBlock);
+                    feedWrapper.appendChild(postBlock);
                 });
 
-                feed.style.transform = `translateY(0px)`;
+                feedWrapper.scrollTop = 0;
 
             } catch (error) {
                 console.error("API Fetch Error:", error);
-                feed.innerHTML = '<div class="loading-box">Failed to load content. Please verify YouTube API Key.</div>';
+                feedWrapper.innerHTML = '<div class="loading-box">Failed to load content. Please verify YouTube API Key.</div>';
             }
         }
 
-        // Auto-fetch on page load
+        // Button Controls for easy scrolling
+        function scrollFeed(direction) {
+            const h = window.innerHeight;
+            if(direction === 'down') {
+                feedWrapper.scrollBy({ top: h, behavior: 'smooth' });
+            } else {
+                feedWrapper.scrollBy({ top: -h, behavior: 'smooth' });
+            }
+        }
+
         if(YOUTUBE_API_KEY !== "YOUR_YOUTUBE_API_KEY") {
             fetchEducationalVideos();
-        } else {
-            feed.innerHTML = '<div class="loading-box" style="padding: 20px; text-align: center;"><b>🔑 Step Required:</b><br>Code me `YOUTUBE_API_KEY` add karein ta ke auto-videos load ho sakein.</div>';
         }
-
-        // Swipe Scroll Handler
-        let touchStartY = 0;
-        container.addEventListener('touchstart', (e) => touchStartY = e.touches[0].clientY, { passive: true });
-
-        container.addEventListener('touchend', (e) => {
-            let touchEndY = e.changedTouches[0].clientY;
-            let diffY = touchStartY - touchEndY;
-
-            if (Math.abs(diffY) > 50) {
-                if (diffY > 0 && currentFeedIndex < totalVideos - 1) {
-                    currentFeedIndex++;
-                } else if (diffY < 0 && currentFeedIndex > 0) {
-                    currentFeedIndex--;
-                }
-                feed.style.transform = `translateY(-${currentFeedIndex * container.clientHeight}px)`;
-            }
-        }, { passive: true });
     </script>
 </body>
 </html>
