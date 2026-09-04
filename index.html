@@ -8,8 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- YouTube IFrame API -->
-    <script src="https://www.youtube.com/iframe_api"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
         body { font-family: 'Poppins', sans-serif; }
@@ -18,18 +16,18 @@
 <body class="bg-slate-900 min-h-screen flex flex-col text-slate-100">
 
     <!-- Header / Navbar -->
-    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
-            <!-- Logo -->
-            <div class="flex items-center space-x-2 cursor-pointer" onclick="resetToHome()">
+    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+            <!-- Logo (Hidden when Video is Playing) -->
+            <div id="mainLogo" class="flex items-center space-x-2 cursor-pointer transition-all duration-300" onclick="resetToHome()">
                 <div class="bg-amber-500 p-2 rounded-2xl text-slate-900 font-bold">
                     <i data-lucide="smile" class="w-7 h-7"></i>
                 </div>
                 <span class="text-2xl font-bold text-amber-500 tracking-wide">KidsTarbiyat</span>
             </div>
 
-            <!-- Search Bar -->
-            <div class="flex-1 max-w-md relative">
+            <!-- Search Bar (Always Visible & Centered when Playing) -->
+            <div id="searchBarWrapper" class="flex-1 max-w-md relative transition-all duration-300">
                 <input type="text" id="searchInput" placeholder="Search safe kids videos..." 
                        class="w-full pl-10 pr-24 py-2 bg-slate-900 border border-slate-700 rounded-full text-slate-100 focus:outline-none focus:border-amber-500 transition text-sm">
                 <i data-lucide="search" class="w-5 h-5 text-slate-400 absolute left-3 top-2.5"></i>
@@ -38,16 +36,16 @@
                 </button>
             </div>
 
-            <!-- Parental Control Lock Toggle -->
-            <button onclick="openParentModal()" class="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-amber-400 px-4 py-2 rounded-xl text-xs font-bold transition border border-slate-600">
+            <!-- Parental Control Lock Toggle (Hidden when Video is Playing) -->
+            <button id="lockToggleBtn" onclick="openParentModal()" class="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-amber-400 px-4 py-2 rounded-xl text-xs font-bold transition border border-slate-600">
                 <i data-lucide="lock" class="w-4 h-4"></i>
                 <span id="lockStatusText">Search: Safe Mode</span>
             </button>
         </div>
     </header>
 
-    <!-- Category Tabs -->
-    <nav class="bg-slate-800/80 border-b border-slate-700/60 py-2.5">
+    <!-- Category Tabs (Hidden when Video is Playing) -->
+    <nav id="categoryNav" class="bg-slate-800/80 border-b border-slate-700/60 py-2.5 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 flex gap-2 overflow-x-auto pb-1 no-scrollbar">
             <button onclick="selectCategory('Islami Tarbiyat Kids')" class="cat-btn bg-amber-500 text-slate-950 px-4 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shadow-sm">
                 🕌 Islami Tarbiyat
@@ -67,18 +65,16 @@
         </div>
     </nav>
 
-    <!-- MAIN YOUTUBE STYLE THEATER PLAYER AREA (Initially Hidden) -->
+    <!-- MAIN YOUTUBE STYLE THEATER PLAYER AREA -->
     <section id="cinemaPlayerSection" class="hidden bg-black border-b border-slate-800 py-6">
         <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            <!-- Main Video Column (2/3 width on desktop) -->
+            <!-- Main Video Column -->
             <div class="lg:col-span-2 flex flex-col">
-                <!-- Native YouTube Player Box -->
                 <div class="relative w-full aspect-video bg-slate-950 rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
-                    <div id="youtubePlayer"></div>
+                    <div id="youtubePlayerContainer" class="w-full h-full"></div>
                 </div>
 
-                <!-- Video Title & Actions Bar -->
                 <div class="mt-4 flex flex-col gap-3">
                     <h1 id="activeVideoTitle" class="text-lg sm:text-xl font-bold text-slate-100 line-clamp-2">Select a video to play</h1>
                     
@@ -111,14 +107,12 @@
                 </div>
             </div>
 
-            <!-- Up Next / Related Videos Sidebar (1/3 width) -->
+            <!-- Up Next Sidebar -->
             <div class="flex flex-col gap-3">
                 <h3 class="font-bold text-sm text-slate-400 uppercase tracking-wider flex items-center gap-2">
                     <i data-lucide="play-square" class="w-4 h-4 text-amber-500"></i> Up Next / Safe Content
                 </h3>
-                <div id="sidebarContainer" class="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-1">
-                    <!-- Dynamic Sidebar Small Cards -->
-                </div>
+                <div id="sidebarContainer" class="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-1"></div>
             </div>
         </div>
     </section>
@@ -132,12 +126,8 @@
             <span id="videoCount" class="text-xs font-semibold text-slate-400">Showing videos</span>
         </div>
 
-        <!-- Video Grid Container -->
-        <div id="videoContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            <!-- Dynamic Video Cards -->
-        </div>
+        <div id="videoContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
 
-        <!-- Empty State -->
         <div id="emptyState" class="hidden text-center py-16">
             <i data-lucide="video-off" class="w-16 h-16 text-slate-600 mx-auto mb-3"></i>
             <p class="text-slate-400 font-semibold" id="emptyMessage">No safe videos found.</p>
@@ -171,28 +161,12 @@
         let savedFavorites = JSON.parse(localStorage.getItem('kids_fav_videos') || '[]');
         let currentLoadedVideos = [];
         let activeVideo = null;
-        let player = null;
 
         lucide.createIcons();
 
         window.addEventListener('DOMContentLoaded', () => {
             selectCategory('Islami Tarbiyat Kids');
         });
-
-        // Initialize YouTube Iframe API Player
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('youtubePlayer', {
-                height: '100%',
-                width: '100%',
-                playerVars: {
-                    'autoplay': 1,
-                    'controls': 1,
-                    'rel': 0,
-                    'modestbranding': 1,
-                    'playsinline': 1
-                }
-            });
-        }
 
         async function fetchYouTubeVideos(query) {
             const container = document.getElementById('videoContainer');
@@ -272,7 +246,6 @@
             lucide.createIcons();
         }
 
-        // Render Up-Next Sidebar Videos
         function renderSidebarVideos(items) {
             const sidebar = document.getElementById('sidebarContainer');
             sidebar.innerHTML = '';
@@ -299,36 +272,53 @@
             });
         }
 
-        // Activate Main Top YouTube Theater Player
+        // Activate Main Top YouTube Player & Hide Header UI
         function playInTheater(videoId, title, channel) {
             activeVideo = { id: videoId, title, channel };
             
             document.getElementById('activeVideoTitle').innerText = title;
             document.getElementById('activeChannelTitle').innerText = channel;
             
+            // Render Dynamic YouTube Iframe Direct
+            const playerBox = document.getElementById('youtubePlayerContainer');
+            playerBox.innerHTML = `
+                <iframe class="w-full h-full rounded-2xl" 
+                        src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1" 
+                        title="${title}" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        allowfullscreen>
+                </iframe>
+            `;
+
+            // HIDE Logo, Parental Lock button & Category Nav Bar
+            document.getElementById('mainLogo').classList.add('hidden');
+            document.getElementById('lockToggleBtn').classList.add('hidden');
+            document.getElementById('categoryNav').classList.add('hidden');
+            
+            // Center Search Bar
+            document.getElementById('searchBarWrapper').classList.add('mx-auto');
+
             const cinemaSection = document.getElementById('cinemaPlayerSection');
             cinemaSection.classList.remove('hidden');
 
-            // Smooth Scroll to Top Player
             window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            if (player && typeof player.loadVideoById === 'function') {
-                player.loadVideoById(videoId);
-            } else {
-                setTimeout(() => {
-                    if (player && typeof player.loadVideoById === 'function') {
-                        player.loadVideoById(videoId);
-                    }
-                }, 500);
-            }
             updateFavBtnState(videoId);
         }
 
+        // Close Player & Restore Elements
         function closeTheaterPlayer() {
-            if (player && typeof player.stopVideo === 'function') {
-                player.stopVideo();
-            }
+            const playerBox = document.getElementById('youtubePlayerContainer');
+            playerBox.innerHTML = ''; // Stop Video Output
+
             document.getElementById('cinemaPlayerSection').classList.add('hidden');
+
+            // UNHIDE Header Elements
+            document.getElementById('mainLogo').classList.remove('hidden');
+            document.getElementById('lockToggleBtn').classList.remove('hidden');
+            document.getElementById('categoryNav').classList.remove('hidden');
+            
+            document.getElementById('searchBarWrapper').classList.remove('mx-auto');
         }
 
         function resetToHome() {
