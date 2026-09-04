@@ -1,366 +1,327 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ur" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pine Hills Kids Safe Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kids Tarbiyat Hub - Safe & Educational Kids Videos</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        html, body {
-            background-color: #000;
-            color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            user-select: none;
-        }
-        body { display: flex; justify-content: center; align-items: center; }
-        
-        .app-container {
-            width: 100%;
-            max-width: 450px;
-            height: 100%;
-            position: relative;
-            overflow: hidden;
-            background-color: #000;
-        }
-
-        /* HEADER */
-        .header-wrapper {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            padding: 14px 16px;
-            z-index: 100;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            pointer-events: none;
-        }
-
-        .header-brand { display: flex; align-items: center; gap: 10px; pointer-events: auto; }
-        .header-logo-img {
-            width: 40px; height: 40px; border-radius: 50%; object-fit: cover;
-            border: 2px solid #ffd700; box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
-        }
-        .school-name { font-size: 14px; font-weight: 800; color: #fff; }
-        .school-tagline { font-size: 10px; color: #ffd700; font-weight: 600; }
-        .safe-badge {
-            background: rgba(32, 213, 236, 0.2);
-            border: 1px solid #20d5ec;
-            color: #20d5ec;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: 700;
-            pointer-events: auto;
-        }
-
-        /* FEED VIEWPORT */
-        .feed-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-
-        .video-card {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000;
-            display: none;
-        }
-
-        .video-card.active {
-            display: block;
-        }
-
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        /* OVERLAY INFO */
-        .video-info-overlay {
-            position: absolute;
-            left: 0;
-            bottom: 60px;
-            width: 100%;
-            padding: 20px 16px;
-            z-index: 15;
-            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 100%);
-            pointer-events: none;
-        }
-        .video-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 6px; line-height: 1.3; }
-        .channel-name { font-size: 12px; color: #ffd700; font-weight: 600; }
-
-        /* TOUCH CAPTURE OVERLAY FOR SWIPE */
-        .touch-swipe-layer {
-            position: absolute;
-            top: 70px;
-            left: 0;
-            width: 100%;
-            height: calc(100% - 130px);
-            z-index: 50;
-        }
-
-        /* NAVIGATION BAR */
-        .bottom-nav-bar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 56px;
-            background: rgba(13, 13, 18, 0.95);
-            backdrop-filter: blur(10px);
-            z-index: 100;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-        }
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            color: #8a8a9e;
-            font-size: 10px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .nav-item.active { color: #ffd700; }
-        .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
-
-        .loading-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: #ffd700;
-            font-size: 14px;
-            gap: 10px;
-            text-align: center;
-            padding: 20px;
-        }
-
-        /* SIDE ARROWS FOR DESKTOP/CLICK SCROLL */
-        .side-nav-btn {
-            position: absolute;
-            right: 12px;
-            bottom: 120px;
-            z-index: 90;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .btn-circle {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: rgba(0,0,0,0.6);
-            border: 1px solid rgba(255,215,0,0.5);
-            color: #ffd700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            cursor: pointer;
-            backdrop-filter: blur(5px);
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; }
     </style>
 </head>
-<body>
+<body class="bg-amber-50 min-h-screen flex flex-col text-slate-800">
 
-    <div class="app-container">
-        
-        <!-- Header -->
-        <div class="header-wrapper">
-            <div class="header-brand">
-                <img src="real logo copy.jpg" alt="Logo" class="header-logo-img" onerror="this.style.display='none'">
-                <div>
-                    <div class="school-name">PINE HILLS</div>
-                    <div class="school-tagline">Kids Tarbiyat Feed</div>
+    <!-- Header / Navbar -->
+    <header class="bg-white shadow-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <!-- Logo -->
+            <div class="flex items-center space-x-2 cursor-pointer" onclick="selectCategory('Islami Tarbiyat Kids')">
+                <div class="bg-amber-400 p-2 rounded-2xl text-white">
+                    <i data-lucide="smile" class="w-8 h-8"></i>
                 </div>
+                <span class="text-2xl font-bold text-amber-600 tracking-wide">KidsTarbiyat</span>
             </div>
-            <div class="safe-badge">🛡️ 100% Safe Zone</div>
+
+            <!-- Search Bar -->
+            <div class="flex-1 max-w-md relative">
+                <input type="text" id="searchInput" placeholder="Search safe kids videos..." 
+                       class="w-full pl-10 pr-24 py-2 border-2 border-amber-200 rounded-full focus:outline-none focus:border-amber-400 transition text-sm">
+                <i data-lucide="search" class="w-5 h-5 text-gray-400 absolute left-3 top-2.5"></i>
+                <button onclick="handleSearch()" class="absolute right-1 top-1 bg-amber-500 hover:bg-amber-600 text-white px-4 py-1.5 rounded-full text-xs font-semibold transition">
+                    Search
+                </button>
+            </div>
+
+            <!-- Parental Control Lock Toggle -->
+            <button onclick="openParentModal()" class="flex items-center gap-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-4 py-2 rounded-xl text-xs font-bold transition">
+                <i data-lucide="lock" class="w-4 h-4"></i>
+                <span id="lockStatusText">Search: Safe Mode</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Category Tabs -->
+    <nav class="bg-amber-100/60 border-b border-amber-200 py-3">
+        <div class="max-w-7xl mx-auto px-4 flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+            <button onclick="selectCategory('Islami Tarbiyat Kids')" class="cat-btn bg-amber-500 text-white px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm">
+                🕌 Islami Tarbiyat
+            </button>
+            <button onclick="selectCategory('Moral Stories for Kids English Urdu')" class="cat-btn bg-white hover:bg-amber-200 text-amber-900 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm">
+                📖 Moral Stories
+            </button>
+            <button onclick="selectCategory('Good Habits for Kids')" class="cat-btn bg-white hover:bg-amber-200 text-amber-900 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm">
+                ⭐ Good Habits
+            </button>
+            <button onclick="selectCategory('Kids Urdu Poems Nazmein')" class="cat-btn bg-white hover:bg-amber-200 text-amber-900 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm">
+                🎵 Nursery Rhymes & Poems
+            </button>
+            <button onclick="showFavorites()" class="cat-btn bg-white hover:bg-amber-200 text-amber-900 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm flex items-center gap-1">
+                <i data-lucide="heart" class="w-3.5 h-3.5 text-red-500 fill-red-500"></i> Saved Videos
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Grid -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
+        <!-- Status / Section Title -->
+        <div class="flex justify-between items-center mb-6">
+            <h2 id="sectionTitle" class="text-xl font-bold text-slate-700 flex items-center gap-2">
+                <i data-lucide="sparkles" class="text-amber-500"></i> Islami Tarbiyat
+            </h2>
+            <span id="videoCount" class="text-xs font-semibold text-gray-500">Showing videos</span>
         </div>
 
-        <!-- Video Player Display -->
-        <div class="feed-container" id="feedContainer">
-            <div class="loading-box" id="loadingState">
-                <span>✨ Loading Fresh Safe Content...</span>
-            </div>
+        <!-- Video Grid Container -->
+        <div id="videoContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Dynamic Video Cards -->
         </div>
 
-        <!-- Touch Layer for Swipe Control -->
-        <div class="touch-swipe-layer" id="touchLayer"></div>
-
-        <!-- Right Side Scroll Buttons -->
-        <div class="side-nav-btn">
-            <div class="btn-circle" onclick="playPreviousVideo()">▲</div>
-            <div class="btn-circle" onclick="playNextVideo()">▼</div>
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-16">
+            <i data-lucide="video-off" class="w-16 h-16 text-gray-300 mx-auto mb-3"></i>
+            <p class="text-gray-500 font-semibold" id="emptyMessage">No safe videos found.</p>
         </div>
+    </main>
 
-        <!-- Navigation Bar -->
-        <div class="bottom-nav-bar">
-            <div class="nav-item active">
-                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-                <span>Safe Feed</span>
+    <!-- Full YouTube Experience Video Player Modal -->
+    <div id="playerModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-2 sm:p-4">
+        <div class="bg-slate-900 w-full max-w-5xl rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[95vh] border border-slate-700">
+            <!-- Header Bar -->
+            <div class="flex justify-between items-center p-3 sm:p-4 bg-slate-800 text-white border-b border-slate-700">
+                <div class="flex items-center gap-2 overflow-hidden">
+                    <span class="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">YouTube Player</span>
+                    <h3 id="modalVideoTitle" class="font-bold text-sm sm:text-base line-clamp-1 text-gray-100">Video Title</h3>
+                </div>
+                <button onclick="closePlayerModal()" class="p-1.5 hover:bg-slate-700 text-gray-300 hover:text-white rounded-full transition">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
             </div>
-            <div class="nav-item" onclick="refreshFeed()">
-                <svg viewBox="0 0 24 24"><path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 17.72C5.62 16.07 5 14.11 5 12c0-3.87 3.13-7 7-7z"/></svg>
-                <span>Refresh</span>
+            
+            <!-- Standard Full YouTube Embedded Player Frame -->
+            <div class="relative w-full pb-[56.25%] bg-black">
+                <iframe id="youtubeIframe" 
+                        class="absolute top-0 left-0 w-full h-full" 
+                        src="" 
+                        title="YouTube video player" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        allowfullscreen>
+                </iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parental Control Modal -->
+    <div id="parentModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl text-center">
+            <div class="bg-indigo-100 text-indigo-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="shield-check" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800">Parental Control</h3>
+            <p class="text-xs text-gray-500 mt-1 mb-4">Enter PIN to toggle search permissions (Default PIN: 1234)</p>
+            
+            <input type="password" id="pinInput" placeholder="Enter PIN" maxlength="4" 
+                   class="w-full text-center tracking-widest text-xl font-bold py-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 mb-4">
+            
+            <div class="flex gap-2">
+                <button onclick="closeParentModal()" class="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-xl transition">Cancel</button>
+                <button onclick="verifyPIN()" class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition">Unlock</button>
             </div>
         </div>
     </div>
 
     <script>
-        const YOUTUBE_API_KEY = "AIzaSyBjFaFHtHp2auL96X20FR3ivu5_E3OzFdw";
+        // APNI YOUTUBE DATA API KEY YAHAN PASTE KAREIN
+        const YOUTUBE_API_KEY = "AIzaSyBjFaFHtHp2auL96X20FR3ivu5_E3OzFdw"; 
+        
+        const PARENT_PIN = "1234";
+        let isUnrestrictedSearch = false;
+        let savedFavorites = JSON.parse(localStorage.getItem('kids_fav_videos') || '[]');
 
-        const safeSearchTopics = [
-            "Urdu moral stories animated kids",
-            "Islamic stories prophet stories Urdu kids",
-            "Urdu poem nursery rhymes kids",
-            "Pencil drawing easy step by step kids",
-            "Kids science experiments Urdu simple",
-            "Sabaq amoz kahaniyan Urdu kids",
-            "Good habits for children Urdu animated"
-        ];
+        lucide.createIcons();
 
-        let videoPlaylist = [];
-        let loadedVideoIds = new Set();
-        let currentIndex = -1;
-        let isNavigating = false;
-
-        const feedContainer = document.getElementById('feedContainer');
-        const touchLayer = document.getElementById('touchLayer');
-
-        async function fetchMoreVideos() {
-            const topic = safeSearchTopics[Math.floor(Math.random() * safeSearchTopics.length)];
-            const apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=${encodeURIComponent(topic)}&type=video&videoEmbeddable=true&safeSearch=strict&key=${YOUTUBE_API_KEY}`;
-
-            try {
-                const res = await fetch(apiUrl);
-                const data = await res.json();
-
-                if (data.items && data.items.length > 0) {
-                    data.items.forEach(item => {
-                        const vId = item.id.videoId;
-                        if (!loadedVideoIds.has(vId)) {
-                            loadedVideoIds.add(vId);
-                            videoPlaylist.push({
-                                id: vId,
-                                title: item.snippet.title,
-                                channel: item.snippet.channelTitle
-                            });
-                        }
-                    });
-                }
-            } catch (err) {
-                console.error("API Fetch Error:", err);
-            }
-        }
-
-        async function renderVideo(index) {
-            if (index < 0 || index >= videoPlaylist.length) return;
-
-            // Stop all existing video cards by cleaning container or re-creating iframe source to enforce Autoplay
-            const item = videoPlaylist[index];
-            feedContainer.innerHTML = `
-                <div class="video-card active" id="card-${index}">
-                    <iframe id="iframe-${index}"
-                            src="https://www.youtube.com/embed/${item.id}?autoplay=1&mute=0&enablejsapi=1&rel=0&playsinline=1" 
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                            allowfullscreen></iframe>
-                    <div class="video-info-overlay">
-                        <div class="video-title">${item.title}</div>
-                        <div class="channel-name">📺 ${item.channel}</div>
-                    </div>
-                </div>
-            `;
-
-            // Auto fetch more videos when near end
-            if (videoPlaylist.length - index <= 3) {
-                fetchMoreVideos();
-            }
-        }
-
-        async function playNextVideo() {
-            if (isNavigating) return;
-            isNavigating = true;
-
-            if (currentIndex + 1 < videoPlaylist.length) {
-                currentIndex++;
-                await renderVideo(currentIndex);
-            } else {
-                await fetchMoreVideos();
-                if (currentIndex + 1 < videoPlaylist.length) {
-                    currentIndex++;
-                    await renderVideo(currentIndex);
-                }
-            }
-
-            setTimeout(() => { isNavigating = false; }, 300);
-        }
-
-        async function playPreviousVideo() {
-            if (isNavigating) return;
-            isNavigating = true;
-
-            if (currentIndex > 0) {
-                currentIndex--;
-                await renderVideo(currentIndex);
-            }
-
-            setTimeout(() => { isNavigating = false; }, 300);
-        }
-
-        async function initFeed() {
-            await fetchMoreVideos();
-            if (videoPlaylist.length > 0) {
-                currentIndex = 0;
-                renderVideo(currentIndex);
-            }
-        }
-
-        async function refreshFeed() {
-            feedContainer.innerHTML = '<div class="loading-box" id="loadingState"><span>✨ Loading New Videos...</span></div>';
-            videoPlaylist = [];
-            loadedVideoIds.clear();
-            currentIndex = -1;
-            await initFeed();
-        }
-
-        // SWIPE & SCROLL DETECTOR
-        let touchStartY = 0;
-        touchLayer.addEventListener('touchstart', (e) => touchStartY = e.touches[0].clientY, { passive: true });
-        touchLayer.addEventListener('touchend', (e) => {
-            let touchEndY = e.changedTouches[0].clientY;
-            let diff = touchStartY - touchEndY;
-            if (Math.abs(diff) > 40) {
-                if (diff > 0) playNextVideo();
-                else playPreviousVideo();
-            }
-        }, { passive: true });
-
-        // MOUSE WHEEL SCROLL FOR PC (Debounced)
-        let wheelTimeout;
-        window.addEventListener('wheel', (e) => {
-            clearTimeout(wheelTimeout);
-            wheelTimeout = setTimeout(() => {
-                if (e.deltaY > 0) playNextVideo();
-                else playPreviousVideo();
-            }, 50);
+        window.addEventListener('DOMContentLoaded', () => {
+            selectCategory('Islami Tarbiyat Kids');
         });
 
-        initFeed();
+        async function fetchYouTubeVideos(query) {
+            const container = document.getElementById('videoContainer');
+            const emptyState = document.getElementById('emptyState');
+            
+            container.innerHTML = `
+                <div class="col-span-full text-center py-20">
+                    <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-amber-500 border-t-transparent"></div>
+                    <p class="mt-3 text-sm font-semibold text-gray-500">Safe Videos Load Ho Rahi Hain...</p>
+                </div>
+            `;
+            emptyState.classList.add('hidden');
+
+            const searchQuery = encodeURIComponent(query + ' kids tarbiyat moral educational');
+            const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=16&q=${searchQuery}&type=video&safeSearch=strict&key=${YOUTUBE_API_KEY}`;
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (!data.items || data.items.length === 0) {
+                    container.innerHTML = '';
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+
+                renderVideos(data.items);
+            } catch (err) {
+                console.error("API Fetch Error:", err);
+                container.innerHTML = '';
+                document.getElementById('emptyMessage').innerText = "YouTube API key add karein ya Internet Check karein.";
+                emptyState.classList.remove('hidden');
+            }
+        }
+
+        function renderVideos(items) {
+            const container = document.getElementById('videoContainer');
+            container.innerHTML = '';
+            document.getElementById('videoCount').innerText = `${items.length} videos available`;
+
+            items.forEach(item => {
+                const videoId = item.id.videoId;
+                const title = item.snippet.title;
+                const thumb = item.snippet.thumbnails.high.url;
+                const channel = item.snippet.channelTitle;
+
+                const isFav = savedFavorites.some(v => v.id === videoId);
+
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition flex flex-col group border border-amber-100";
+                card.innerHTML = `
+                    <div class="relative cursor-pointer overflow-hidden" onclick="openPlayer('${videoId}', \`${escapeQuotes(title)}\`)">
+                        <img src="${thumb}" alt="${title}" class="w-full h-44 object-cover group-hover:scale-105 transition duration-300">
+                        <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition flex items-center justify-center">
+                            <div class="bg-amber-500/90 text-white p-3 rounded-full shadow-lg group-hover:scale-110 transition">
+                                <i data-lucide="play" class="w-6 h-6 fill-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 flex flex-col flex-1 justify-between">
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-800 line-clamp-2 mb-1 cursor-pointer hover:text-amber-600 transition" onclick="openPlayer('${videoId}', \`${escapeQuotes(title)}\`)">${title}</h4>
+                            <p class="text-xs text-gray-500 font-medium">${channel}</p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-100 flex justify-between items-center">
+                            <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2.5 py-1 rounded-full">Safe Video</span>
+                            <button onclick="toggleFavorite('${videoId}', \`${escapeQuotes(title)}\`, '${thumb}', '${channel}')" class="text-gray-400 hover:text-red-500 transition">
+                                <i data-lucide="heart" class="w-5 h-5 ${isFav ? 'text-red-500 fill-red-500' : ''}"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function selectCategory(categoryQuery) {
+            document.getElementById('sectionTitle').innerHTML = `<i data-lucide="sparkles" class="text-amber-500"></i> ${categoryQuery.split(' ')[0]} Videos`;
+            fetchYouTubeVideos(categoryQuery);
+        }
+
+        function handleSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) return;
+
+            if (!isUnrestrictedSearch) {
+                fetchYouTubeVideos(`${query} safe kids`);
+            } else {
+                fetchYouTubeVideos(query);
+            }
+            document.getElementById('sectionTitle').innerText = `Results for: "${query}"`;
+        }
+
+        // Open YouTube Embedded Player with Full Native YouTube Controls
+        function openPlayer(videoId, title) {
+            document.getElementById('modalVideoTitle').innerText = title;
+            
+            // Standard Full YouTube Player Params:
+            // controls=1 (Play/Pause, Mute/Volume, Seekbar, Fullscreen enabled)
+            // autoplay=1 (Automatically plays video)
+            // rel=0 (Restricts recommendations)
+            const youtubeUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&rel=0&modestbranding=0&enablejsapi=1`;
+            
+            document.getElementById('youtubeIframe').src = youtubeUrl;
+            document.getElementById('playerModal').classList.remove('hidden');
+        }
+
+        function closePlayerModal() {
+            // Stop Video Playback immediately on close
+            document.getElementById('youtubeIframe').src = '';
+            document.getElementById('playerModal').classList.add('hidden');
+        }
+
+        function toggleFavorite(id, title, thumb, channel) {
+            const index = savedFavorites.findIndex(v => v.id === id);
+            if (index > -1) {
+                savedFavorites.splice(index, 1);
+            } else {
+                savedFavorites.push({ id, title, thumb, channel });
+            }
+            localStorage.setItem('kids_fav_videos', JSON.stringify(savedFavorites));
+            
+            const query = document.getElementById('searchInput').value || 'Islami Tarbiyat Kids';
+            fetchYouTubeVideos(query);
+        }
+
+        function showFavorites() {
+            document.getElementById('sectionTitle').innerHTML = `<i data-lucide="heart" class="text-red-500"></i> Saved Videos`;
+            const container = document.getElementById('videoContainer');
+            const emptyState = document.getElementById('emptyState');
+
+            if (savedFavorites.length === 0) {
+                container.innerHTML = '';
+                document.getElementById('emptyMessage').innerText = "Abhi koi favorite video save nahi hui.";
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            const mappedItems = savedFavorites.map(v => ({
+                id: { videoId: v.id },
+                snippet: {
+                    title: v.title,
+                    channelTitle: v.channel,
+                    thumbnails: { high: { url: v.thumb } }
+                }
+            }));
+            renderVideos(mappedItems);
+        }
+
+        function openParentModal() {
+            document.getElementById('pinInput').value = '';
+            document.getElementById('parentModal').classList.remove('hidden');
+        }
+
+        function closeParentModal() {
+            document.getElementById('parentModal').classList.add('hidden');
+        }
+
+        function verifyPIN() {
+            const pin = document.getElementById('pinInput').value;
+            if (pin === PARENT_PIN) {
+                isUnrestrictedSearch = !isUnrestrictedSearch;
+                document.getElementById('lockStatusText').innerText = isUnrestrictedSearch ? "Search: Parent Mode" : "Search: Safe Mode";
+                alert(isUnrestrictedSearch ? "Parent Mode Active!" : "Safe Mode Active!");
+                closeParentModal();
+            } else {
+                alert("Incorrect PIN!");
+            }
+        }
+
+        function escapeQuotes(str) {
+            return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
+        }
     </script>
 </body>
 </html>
