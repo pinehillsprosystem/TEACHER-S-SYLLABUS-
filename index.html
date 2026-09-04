@@ -18,7 +18,7 @@
     <!-- Header / Navbar -->
     <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-            <!-- Logo (Hidden when Video is Playing) -->
+            <!-- Logo -->
             <div id="mainLogo" class="flex items-center space-x-2 cursor-pointer transition-all duration-300" onclick="resetToHome()">
                 <div class="bg-amber-500 p-2 rounded-2xl text-slate-900 font-bold">
                     <i data-lucide="smile" class="w-7 h-7"></i>
@@ -26,7 +26,7 @@
                 <span class="text-2xl font-bold text-amber-500 tracking-wide">KidsTarbiyat</span>
             </div>
 
-            <!-- Search Bar (Always Visible & Centered when Playing) -->
+            <!-- Search Bar -->
             <div id="searchBarWrapper" class="flex-1 max-w-md relative transition-all duration-300">
                 <input type="text" id="searchInput" placeholder="Search safe kids videos..." 
                        class="w-full pl-10 pr-24 py-2 bg-slate-900 border border-slate-700 rounded-full text-slate-100 focus:outline-none focus:border-amber-500 transition text-sm">
@@ -36,7 +36,7 @@
                 </button>
             </div>
 
-            <!-- Parental Control Lock Toggle (Hidden when Video is Playing) -->
+            <!-- Parental Control Lock Toggle -->
             <button id="lockToggleBtn" onclick="openParentModal()" class="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-amber-400 px-4 py-2 rounded-xl text-xs font-bold transition border border-slate-600">
                 <i data-lucide="lock" class="w-4 h-4"></i>
                 <span id="lockStatusText">Search: Safe Mode</span>
@@ -44,7 +44,7 @@
         </div>
     </header>
 
-    <!-- Category Tabs (Hidden when Video is Playing) -->
+    <!-- Category Tabs -->
     <nav id="categoryNav" class="bg-slate-800/80 border-b border-slate-700/60 py-2.5 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 flex gap-2 overflow-x-auto pb-1 no-scrollbar">
             <button onclick="selectCategory('Islami Tarbiyat Kids')" class="cat-btn bg-amber-500 text-slate-950 px-4 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shadow-sm">
@@ -86,7 +86,7 @@
                             <div>
                                 <h4 id="activeChannelTitle" class="font-bold text-sm text-slate-200">Kids Channel</h4>
                                 <p class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
-                                    <i data-lucide="check-circle-2" class="w-3 h-3"></i> Verified Safe Content
+                                    <i data-lucide="check-circle-2" class="w-3 h-3"></i> Fast Streaming Active
                                 </p>
                             </div>
                         </div>
@@ -126,7 +126,7 @@
             <h2 id="sectionTitle" class="text-xl font-bold text-slate-100 flex items-center gap-2">
                 <i data-lucide="sparkles" class="text-amber-500"></i> Islami Tarbiyat
             </h2>
-            <span id="videoCount" class="text-xs font-semibold text-slate-400">Showing videos</span>
+            <span id="videoCount" class="text-xs font-semibold text-slate-400">Loading videos...</span>
         </div>
 
         <div id="videoContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
@@ -162,7 +162,6 @@
         
         let isUnrestrictedSearch = false;
         let savedFavorites = JSON.parse(localStorage.getItem('kids_fav_videos') || '[]');
-        let currentLoadedVideos = [];
         let activeVideo = null;
 
         lucide.createIcons();
@@ -171,16 +170,25 @@
             selectCategory('Islami Tarbiyat Kids');
         });
 
+        // Instant Skeleton Render
+        function showSkeletons() {
+            const container = document.getElementById('videoContainer');
+            container.innerHTML = Array(8).fill(`
+                <div class="bg-slate-800/60 rounded-2xl overflow-hidden border border-slate-700/40 animate-pulse">
+                    <div class="aspect-video bg-slate-700"></div>
+                    <div class="p-4 space-y-2">
+                        <div class="h-4 bg-slate-700 rounded w-3/4"></div>
+                        <div class="h-3 bg-slate-700/60 rounded w-1/2"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         async function fetchYouTubeVideos(query) {
             const container = document.getElementById('videoContainer');
             const emptyState = document.getElementById('emptyState');
             
-            container.innerHTML = `
-                <div class="col-span-full text-center py-20">
-                    <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-amber-500 border-t-transparent"></div>
-                    <p class="mt-3 text-sm font-semibold text-slate-400">Loading safe YouTube content...</p>
-                </div>
-            `;
+            showSkeletons();
             emptyState.classList.add('hidden');
 
             const searchQuery = encodeURIComponent(query + ' kids tarbiyat moral educational');
@@ -193,16 +201,16 @@
                 if (!data.items || data.items.length === 0) {
                     container.innerHTML = '';
                     emptyState.classList.remove('hidden');
+                    document.getElementById('videoCount').innerText = '0 videos found';
                     return;
                 }
 
-                currentLoadedVideos = data.items;
                 renderVideos(data.items);
                 renderSidebarVideos(data.items);
             } catch (err) {
                 console.error("API Fetch Error:", err);
                 container.innerHTML = '';
-                document.getElementById('emptyMessage').innerText = "YouTube API key or Internet connection issue.";
+                document.getElementById('emptyMessage').innerText = "Network issue or API limit reached.";
                 emptyState.classList.remove('hidden');
             }
         }
@@ -215,7 +223,7 @@
             items.forEach(item => {
                 const videoId = item.id.videoId;
                 const title = item.snippet.title;
-                const thumb = item.snippet.thumbnails.high.url;
+                const thumb = item.snippet.thumbnails.medium ? item.snippet.thumbnails.medium.url : item.snippet.thumbnails.default.url;
                 const channel = item.snippet.channelTitle;
 
                 const isFav = savedFavorites.some(v => v.id === videoId);
@@ -224,7 +232,7 @@
                 card.className = "bg-slate-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl hover:scale-[1.02] transition duration-300 flex flex-col group border border-slate-700/60";
                 card.innerHTML = `
                     <div class="relative cursor-pointer overflow-hidden aspect-video bg-slate-900" onclick="playInTheater('${videoId}', \`${escapeQuotes(title)}\`, \`${escapeQuotes(channel)}\`)">
-                        <img src="${thumb}" alt="${title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                        <img src="${thumb}" alt="${title}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
                         <div class="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition flex items-center justify-center">
                             <div class="bg-amber-500 text-slate-950 p-3 rounded-full shadow-lg group-hover:scale-110 transition">
                                 <i data-lucide="play" class="w-6 h-6 fill-slate-950"></i>
@@ -256,7 +264,7 @@
             items.slice(0, 8).forEach(item => {
                 const videoId = item.id.videoId;
                 const title = item.snippet.title;
-                const thumb = item.snippet.thumbnails.medium.url;
+                const thumb = item.snippet.thumbnails.medium ? item.snippet.thumbnails.medium.url : item.snippet.thumbnails.default.url;
                 const channel = item.snippet.channelTitle;
 
                 const itemDiv = document.createElement('div');
@@ -264,7 +272,7 @@
                 itemDiv.onclick = () => playInTheater(videoId, title, channel);
                 itemDiv.innerHTML = `
                     <div class="relative w-28 aspect-video rounded-lg overflow-hidden shrink-0 bg-slate-900">
-                        <img src="${thumb}" class="w-full h-full object-cover group-hover:scale-105 transition">
+                        <img src="${thumb}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition">
                     </div>
                     <div class="overflow-hidden flex flex-col justify-center">
                         <h5 class="text-xs font-bold text-slate-200 line-clamp-2 group-hover:text-amber-400 transition">${title}</h5>
@@ -275,7 +283,6 @@
             });
         }
 
-        // Activate Main Top YouTube Player & Hide Header UI
         function playInTheater(videoId, title, channel) {
             activeVideo = { id: videoId, title, channel };
             
@@ -283,11 +290,11 @@
             document.getElementById('activeChannelTitle').innerText = channel;
             document.getElementById('externalWatchBtn').href = `https://www.youtube.com/watch?v=${videoId}`;
             
-            // Render Dynamic YouTube Iframe with optimized parameters
+            // Optimized Embedded Iframe
             const playerBox = document.getElementById('youtubePlayerContainer');
             playerBox.innerHTML = `
                 <iframe class="w-full h-full rounded-2xl" 
-                        src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0" 
+                        src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0" 
                         title="${title}" 
                         frameborder="0" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
@@ -295,12 +302,9 @@
                 </iframe>
             `;
 
-            // HIDE Logo, Parental Lock button & Category Nav Bar
             document.getElementById('mainLogo').classList.add('hidden');
             document.getElementById('lockToggleBtn').classList.add('hidden');
             document.getElementById('categoryNav').classList.add('hidden');
-            
-            // Center Search Bar
             document.getElementById('searchBarWrapper').classList.add('mx-auto');
 
             const cinemaSection = document.getElementById('cinemaPlayerSection');
@@ -310,18 +314,15 @@
             updateFavBtnState(videoId);
         }
 
-        // Close Player & Restore Elements
         function closeTheaterPlayer() {
             const playerBox = document.getElementById('youtubePlayerContainer');
-            playerBox.innerHTML = ''; // Stop Video Output
+            playerBox.innerHTML = ''; 
 
             document.getElementById('cinemaPlayerSection').classList.add('hidden');
 
-            // UNHIDE Header Elements
             document.getElementById('mainLogo').classList.remove('hidden');
             document.getElementById('lockToggleBtn').classList.remove('hidden');
             document.getElementById('categoryNav').classList.remove('hidden');
-            
             document.getElementById('searchBarWrapper').classList.remove('mx-auto');
         }
 
@@ -359,9 +360,6 @@
             if (activeVideo && activeVideo.id === id) {
                 updateFavBtnState(id);
             }
-
-            const query = document.getElementById('searchInput').value || 'Islami Tarbiyat Kids';
-            fetchYouTubeVideos(query);
         }
 
         function toggleFavActive() {
@@ -370,7 +368,7 @@
             if (isFav) {
                 savedFavorites = savedFavorites.filter(v => v.id !== activeVideo.id);
             } else {
-                savedFavorites.push({ id: activeVideo.id, title: activeVideo.title, thumb: `https://i.ytimg.com/vi/${activeVideo.id}/hqdefault.jpg`, channel: activeVideo.channel });
+                savedFavorites.push({ id: activeVideo.id, title: activeVideo.title, thumb: `https://i.ytimg.com/vi/${activeVideo.id}/mqdefault.jpg`, channel: activeVideo.channel });
             }
             localStorage.setItem('kids_fav_videos', JSON.stringify(savedFavorites));
             updateFavBtnState(activeVideo.id);
@@ -419,7 +417,7 @@
                 snippet: {
                     title: v.title,
                     channelTitle: v.channel,
-                    thumbnails: { high: { url: v.thumb } }
+                    thumbnails: { medium: { url: v.thumb } }
                 }
             }));
             renderVideos(mappedItems);
