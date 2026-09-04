@@ -18,18 +18,18 @@
 <body class="bg-slate-900 min-h-screen flex flex-col text-slate-100">
 
     <!-- Header / Navbar -->
-    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-            <!-- Logo (Hidden when Video is Playing) -->
-            <div id="mainLogo" class="flex items-center space-x-2 cursor-pointer transition-all duration-300" onclick="resetToHome()">
+    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <!-- Logo -->
+            <div class="flex items-center space-x-2 cursor-pointer" onclick="resetToHome()">
                 <div class="bg-amber-500 p-2 rounded-2xl text-slate-900 font-bold">
                     <i data-lucide="smile" class="w-7 h-7"></i>
                 </div>
                 <span class="text-2xl font-bold text-amber-500 tracking-wide">KidsTarbiyat</span>
             </div>
 
-            <!-- Search Bar (Always Visible & Centered when Playing) -->
-            <div id="searchBarWrapper" class="flex-1 max-w-md relative transition-all duration-300">
+            <!-- Search Bar -->
+            <div class="flex-1 max-w-md relative">
                 <input type="text" id="searchInput" placeholder="Search safe kids videos..." 
                        class="w-full pl-10 pr-24 py-2 bg-slate-900 border border-slate-700 rounded-full text-slate-100 focus:outline-none focus:border-amber-500 transition text-sm">
                 <i data-lucide="search" class="w-5 h-5 text-slate-400 absolute left-3 top-2.5"></i>
@@ -38,16 +38,16 @@
                 </button>
             </div>
 
-            <!-- Parental Control Lock Toggle (Hidden when Video is Playing) -->
-            <button id="lockToggleBtn" onclick="openParentModal()" class="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-amber-400 px-4 py-2 rounded-xl text-xs font-bold transition border border-slate-600">
+            <!-- Parental Control Lock Toggle -->
+            <button onclick="openParentModal()" class="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-amber-400 px-4 py-2 rounded-xl text-xs font-bold transition border border-slate-600">
                 <i data-lucide="lock" class="w-4 h-4"></i>
                 <span id="lockStatusText">Search: Safe Mode</span>
             </button>
         </div>
     </header>
 
-    <!-- Category Tabs (Hidden when Video is Playing) -->
-    <nav id="categoryNav" class="bg-slate-800/80 border-b border-slate-700/60 py-2.5 transition-all duration-300">
+    <!-- Category Tabs -->
+    <nav class="bg-slate-800/80 border-b border-slate-700/60 py-2.5">
         <div class="max-w-7xl mx-auto px-4 flex gap-2 overflow-x-auto pb-1 no-scrollbar">
             <button onclick="selectCategory('Islami Tarbiyat Kids')" class="cat-btn bg-amber-500 text-slate-950 px-4 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shadow-sm">
                 🕌 Islami Tarbiyat
@@ -67,16 +67,18 @@
         </div>
     </nav>
 
-    <!-- MAIN YOUTUBE STYLE THEATER PLAYER AREA -->
+    <!-- MAIN YOUTUBE STYLE THEATER PLAYER AREA (Initially Hidden) -->
     <section id="cinemaPlayerSection" class="hidden bg-black border-b border-slate-800 py-6">
         <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            <!-- Main Video Column -->
+            <!-- Main Video Column (2/3 width on desktop) -->
             <div class="lg:col-span-2 flex flex-col">
+                <!-- Native YouTube Player Box -->
                 <div class="relative w-full aspect-video bg-slate-950 rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
                     <div id="youtubePlayer"></div>
                 </div>
 
+                <!-- Video Title & Actions Bar -->
                 <div class="mt-4 flex flex-col gap-3">
                     <h1 id="activeVideoTitle" class="text-lg sm:text-xl font-bold text-slate-100 line-clamp-2">Select a video to play</h1>
                     
@@ -109,12 +111,14 @@
                 </div>
             </div>
 
-            <!-- Up Next Sidebar -->
+            <!-- Up Next / Related Videos Sidebar (1/3 width) -->
             <div class="flex flex-col gap-3">
                 <h3 class="font-bold text-sm text-slate-400 uppercase tracking-wider flex items-center gap-2">
                     <i data-lucide="play-square" class="w-4 h-4 text-amber-500"></i> Up Next / Safe Content
                 </h3>
-                <div id="sidebarContainer" class="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-1"></div>
+                <div id="sidebarContainer" class="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-1">
+                    <!-- Dynamic Sidebar Small Cards -->
+                </div>
             </div>
         </div>
     </section>
@@ -128,8 +132,12 @@
             <span id="videoCount" class="text-xs font-semibold text-slate-400">Showing videos</span>
         </div>
 
-        <div id="videoContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+        <!-- Video Grid Container -->
+        <div id="videoContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Dynamic Video Cards -->
+        </div>
 
+        <!-- Empty State -->
         <div id="emptyState" class="hidden text-center py-16">
             <i data-lucide="video-off" class="w-16 h-16 text-slate-600 mx-auto mb-3"></i>
             <p class="text-slate-400 font-semibold" id="emptyMessage">No safe videos found.</p>
@@ -171,6 +179,7 @@
             selectCategory('Islami Tarbiyat Kids');
         });
 
+        // Initialize YouTube Iframe API Player
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('youtubePlayer', {
                 height: '100%',
@@ -263,6 +272,7 @@
             lucide.createIcons();
         }
 
+        // Render Up-Next Sidebar Videos
         function renderSidebarVideos(items) {
             const sidebar = document.getElementById('sidebarContainer');
             sidebar.innerHTML = '';
@@ -289,24 +299,17 @@
             });
         }
 
-        // Activate Main Top YouTube Theater Player & Hide Unwanted Navbar Elements
+        // Activate Main Top YouTube Theater Player
         function playInTheater(videoId, title, channel) {
             activeVideo = { id: videoId, title, channel };
             
             document.getElementById('activeVideoTitle').innerText = title;
             document.getElementById('activeChannelTitle').innerText = channel;
             
-            // HIDE Logo, Parental Lock button & Category Nav Bar
-            document.getElementById('mainLogo').classList.add('hidden');
-            document.getElementById('lockToggleBtn').classList.add('hidden');
-            document.getElementById('categoryNav').classList.add('hidden');
-            
-            // Center Search Bar
-            document.getElementById('searchBarWrapper').classList.add('mx-auto');
-
             const cinemaSection = document.getElementById('cinemaPlayerSection');
             cinemaSection.classList.remove('hidden');
 
+            // Smooth Scroll to Top Player
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
             if (player && typeof player.loadVideoById === 'function') {
@@ -321,20 +324,11 @@
             updateFavBtnState(videoId);
         }
 
-        // Close Player & Restore Header Elements
         function closeTheaterPlayer() {
             if (player && typeof player.stopVideo === 'function') {
                 player.stopVideo();
             }
             document.getElementById('cinemaPlayerSection').classList.add('hidden');
-
-            // UNHIDE Logo, Parental Lock button & Category Nav Bar
-            document.getElementById('mainLogo').classList.remove('hidden');
-            document.getElementById('lockToggleBtn').classList.remove('hidden');
-            document.getElementById('categoryNav').classList.remove('hidden');
-            
-            // Restore Search Bar alignment
-            document.getElementById('searchBarWrapper').classList.remove('mx-auto');
         }
 
         function resetToHome() {
