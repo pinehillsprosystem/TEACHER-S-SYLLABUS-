@@ -92,7 +92,10 @@
                         </div>
 
                         <!-- Action Buttons -->
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <a id="externalWatchBtn" target="_blank" href="#" class="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white px-3.5 py-2 rounded-full text-xs font-bold transition">
+                                <i data-lucide="youtube" class="w-4 h-4"></i> Watch on YouTube
+                            </a>
                             <button id="likeBtn" onclick="toggleLikeActive()" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-full text-xs font-semibold transition">
                                 <i data-lucide="thumbs-up" class="w-4 h-4"></i> <span id="likeText">Like</span>
                             </button>
@@ -181,7 +184,7 @@
             emptyState.classList.add('hidden');
 
             const searchQuery = encodeURIComponent(query + ' kids tarbiyat moral educational');
-            const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=16&q=${searchQuery}&type=video&safeSearch=strict&key=${YOUTUBE_API_KEY}`;
+            const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=16&q=${searchQuery}&type=video&videoEmbeddable=true&safeSearch=strict&key=${YOUTUBE_API_KEY}`;
 
             try {
                 const res = await fetch(url);
@@ -278,12 +281,13 @@
             
             document.getElementById('activeVideoTitle').innerText = title;
             document.getElementById('activeChannelTitle').innerText = channel;
+            document.getElementById('externalWatchBtn').href = `https://www.youtube.com/watch?v=${videoId}`;
             
-            // Render Dynamic YouTube Iframe Direct
+            // Render Dynamic YouTube Iframe with optimized parameters
             const playerBox = document.getElementById('youtubePlayerContainer');
             playerBox.innerHTML = `
                 <iframe class="w-full h-full rounded-2xl" 
-                        src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1" 
+                        src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0" 
                         title="${title}" 
                         frameborder="0" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
